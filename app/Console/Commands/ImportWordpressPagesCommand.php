@@ -3,6 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Models\ContentPage;
+use App\Models\MemorialNotice;
+use App\Models\User;
+use Illuminate\Support\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -10,39 +13,38 @@ use Illuminate\Support\Str;
 class ImportWordpressPagesCommand extends Command
 {
     protected $signature = 'ob:import-pages
-        {--sitemap=https://overlijdens-berichten.nl/sitemap_index.xml : XML sitemap URL}
-        {--limit=0 : Maximaal aantal pagina\'s (0 = alles)}';
+        {--base-url=https://overlijdens-berichten.nl : WordPress basis URL}
+        {--limit=0 : Maximaal aantal items per contenttype (0 = alles)}
+        {--with-posts=1 : Importeer ook WordPress posts}
+        {--with-obituaries=1 : Importeer ook ob_bericht custom post type}';
 
-    protected $description = 'Importeer pagina\'s van een WordPress-site naar content_pages';
+    protected $description = 'Importeer WordPress pagina\'s en berichten naar deze Laravel applicatie';
 
     public function handle(): int
     {
-        $sitemap = (string) $this->option('sitemap');
+        $baseUrl = rtrim((string) $this->option('base-url'), '/');
         $limit = (int) $this->option('limit');
+        $withPosts = (bool) (int) $this->option('with-posts');
+        $withObituaries = (bool) (int) $this->option('with-obituaries');
 
-        $this->info('Sitemap ophalen: '.$sitemap);
-        $urls = $this->collectUrlsFromSitemap($sitemap);
+        $this->info('WordPress import gestart vanaf: '.$baseUrl);
 
-        if ($urls === []) {
-            $this->error('Geen URLs gevonden in sitemap.');
+        $pages = $this->fetchWpCollection($baseUrl.'/wp-json/wp/v2/pages', [
+            'per_page' => 100,
+            'status' => 'publish',
+        ], $limit);
 
-            return self::FAILURE;
+        if ($pages === []) {
+            $this->warn('Geen pagina\'s gevonden of endpoint niet bereikbaar.');
         }
 
-        $urls = array_values(array_filter($urls, fn (string $url) => $this->isLikelyPageUrl($url)));
-        if ($limit > 0) {
-            $urls = array_slice($urls, 0, $limit);
-        }
-
-        $this->info('Te importeren pagina\'s: '.count($urls));
-
-        $bar = $this->output->createProgressBar(count($urls));
+        $this->info('Te importeren pagina\'s: '.count($pages));
+        $bar = $this->output->createProgressBar(count($pages));
         $bar->start();
+        $importedPages = 0;
 
-        $imported = 0;
-
-        foreach ($urls as $url) {
-            $payload = $this->fetchPagePayload($url);
+        foreach ($pages as $page) {
+            $payload = $this->normalizeWpContentToPagePayload($page);
             if ($payload === null) {
                 $bar->advance();
                 continue;
@@ -53,7 +55,7 @@ class ImportWordpressPagesCommand extends Command
                 [
                     'title' => $payload['title'],
                     'slug' => $payload['slug'],
-                    'source_url' => $url,
+                    'source_url' => $payload['source_url'],
                     'meta_description' => $payload['meta_description'],
                     'content_html' => $payload['content_html'],
                     'is_active' => true,
@@ -61,114 +63,211 @@ class ImportWordpressPagesCommand extends Command
                 ]
             );
 
-            $imported++;
+            $importedPages++;
             $bar->advance();
         }
 
         $bar->finish();
-        $this->newLine(2);
-        $this->info('Klaar. Geimporteerd: '.$imported);
+        $this->newLine();
+        $this->info('Pagina\'s geimporteerd: '.$importedPages);
+
+        $importedPosts = 0;
+        $importedObituaries = 0;
+
+        if ($withPosts || $withObituaries) {
+            $importUser = User::query()->firstOrCreate(
+                ['email' => 'import-bot@overlijdens-berichten.nl'],
+                ['name' => 'WordPress Import Bot', 'password' => bcrypt(Str::random(24))]
+            );
+
+            if ($withPosts) {
+                $posts = $this->fetchWpCollection($baseUrl.'/wp-json/wp/v2/posts', [
+                    'per_page' => 100,
+                    'status' => 'publish',
+                    '_embed' => 1,
+                ], $limit);
+
+                $this->info('Te importeren posts: '.count($posts));
+                $importedPosts = $this->importPostLikeItems($posts, $importUser, 'post');
+                $this->info('Posts geimporteerd: '.$importedPosts);
+            }
+
+            if ($withObituaries) {
+                $obItems = $this->fetchWpCollection($baseUrl.'/wp-json/wp/v2/ob_bericht', [
+                    'per_page' => 100,
+                    'status' => 'publish',
+                    '_embed' => 1,
+                ], $limit);
+
+                $this->info('Te importeren ob_bericht items: '.count($obItems));
+                $importedObituaries = $this->importPostLikeItems($obItems, $importUser, 'ob_bericht');
+                $this->info('ob_bericht geimporteerd: '.$importedObituaries);
+            }
+        }
+
+        $this->newLine();
+        $this->info('Import voltooid.');
+        $this->line('- Pagina\'s: '.$importedPages);
+        $this->line('- Posts: '.$importedPosts);
+        $this->line('- ob_bericht: '.$importedObituaries);
 
         return self::SUCCESS;
     }
 
-    private function collectUrlsFromSitemap(string $url): array
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function fetchWpCollection(string $endpoint, array $query, int $limit = 0): array
     {
-        $response = Http::timeout(20)->get($url);
-        if (!$response->ok()) {
-            return [];
-        }
+        $all = [];
+        $page = 1;
+        $totalPages = 1;
 
-        $xml = @simplexml_load_string($response->body());
-        if (!$xml) {
-            return [];
-        }
+        do {
+            $response = Http::timeout(30)->acceptJson()->get($endpoint, array_merge($query, ['page' => $page]));
 
-        $urls = [];
-
-        if (isset($xml->sitemap)) {
-            foreach ($xml->sitemap as $sitemap) {
-                $child = (string) $sitemap->loc;
-                $urls = array_merge($urls, $this->collectUrlsFromSitemap($child));
+            if (!$response->ok()) {
+                break;
             }
-        }
 
-        if (isset($xml->url)) {
-            foreach ($xml->url as $entry) {
-                $loc = (string) $entry->loc;
-                if ($loc !== '') {
-                    $urls[] = $loc;
+            $chunk = $response->json();
+            if (!is_array($chunk)) {
+                break;
+            }
+
+            foreach ($chunk as $item) {
+                if (is_array($item)) {
+                    $all[] = $item;
+                    if ($limit > 0 && count($all) >= $limit) {
+                        return array_slice($all, 0, $limit);
+                    }
                 }
             }
-        }
 
-        return array_values(array_unique($urls));
+            $headerPages = (int) $response->header('X-WP-TotalPages', '1');
+            $totalPages = max($headerPages, 1);
+            $page++;
+        } while ($page <= $totalPages);
+
+        return $all;
     }
 
-    private function isLikelyPageUrl(string $url): bool
+    private function normalizeWpContentToPagePayload(array $item): ?array
     {
-        $host = parse_url($url, PHP_URL_HOST);
-        if (!$host || !Str::contains($host, 'overlijdens-berichten.nl')) {
-            return false;
+        $sourceUrl = (string) ($item['link'] ?? '');
+        $path = $this->normalizePathFromUrl($sourceUrl);
+        if ($path === null) {
+            return null;
         }
 
-        $path = trim((string) parse_url($url, PHP_URL_PATH), '/');
-
-        if ($path === '' || Str::startsWith($path, ['wp-', 'feed'])) {
-            return false;
+        $title = trim((string) data_get($item, 'title.rendered', ''));
+        if ($title === '') {
+            $title = Str::headline((string) ($item['slug'] ?? $path));
         }
 
-        $excludedPrefixes = [
-            'tag/',
-            'author/',
-            'category/',
-            'search/',
-            'page/',
+        $contentHtml = (string) data_get($item, 'content.rendered', '');
+        $metaDescription = trim((string) data_get($item, 'excerpt.rendered', ''));
+        $metaDescription = Str::limit(strip_tags(html_entity_decode($metaDescription)), 190, '');
+
+        return [
+            'title' => strip_tags(html_entity_decode($title)),
+            'slug' => Str::slug((string) ($item['slug'] ?? basename($path))),
+            'path' => $path,
+            'source_url' => $sourceUrl,
+            'meta_description' => $metaDescription,
+            'content_html' => $contentHtml,
         ];
-
-        foreach ($excludedPrefixes as $prefix) {
-            if (Str::startsWith($path, $prefix)) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
-    private function fetchPagePayload(string $url): ?array
+    private function importPostLikeItems(array $items, User $user, string $sourceType): int
     {
-        $response = Http::timeout(20)->get($url);
-        if (!$response->ok()) {
+        $count = 0;
+        $bar = $this->output->createProgressBar(count($items));
+        $bar->start();
+
+        foreach ($items as $item) {
+            $pagePayload = $this->normalizeWpContentToPagePayload($item);
+            if ($pagePayload !== null) {
+                ContentPage::query()->updateOrCreate(
+                    ['path' => $pagePayload['path']],
+                    [
+                        'title' => $pagePayload['title'],
+                        'slug' => $pagePayload['slug'],
+                        'source_url' => $pagePayload['source_url'],
+                        'meta_description' => $pagePayload['meta_description'],
+                        'content_html' => $pagePayload['content_html'],
+                        'is_active' => true,
+                        'is_imported' => true,
+                    ]
+                );
+            }
+
+            $slug = trim((string) ($item['slug'] ?? ''));
+            $title = strip_tags(html_entity_decode((string) data_get($item, 'title.rendered', '')));
+            if ($slug === '' || $title === '') {
+                $bar->advance();
+                continue;
+            }
+
+            $fullName = preg_replace('/\s+/', ' ', trim($title)) ?? $title;
+            $parts = preg_split('/\s+/', $fullName) ?: [];
+            $firstName = $parts[0] ?? null;
+            $lastName = count($parts) > 1 ? implode(' ', array_slice($parts, 1)) : null;
+
+            $excerpt = strip_tags(html_entity_decode((string) data_get($item, 'excerpt.rendered', '')));
+            $content = (string) data_get($item, 'content.rendered', '');
+            $publishedAt = (string) ($item['date_gmt'] ?? $item['date'] ?? '');
+            $featuredImage = (string) data_get($item, '_embedded.wp:featuredmedia.0.source_url', '');
+
+            MemorialNotice::query()->updateOrCreate(
+                ['slug' => $slug],
+                [
+                    'user_id' => $user->id,
+                    'title' => $title,
+                    'type' => $this->inferNoticeType($title, $excerpt, $sourceType),
+                    'deceased_first_name' => $firstName,
+                    'deceased_last_name' => $lastName,
+                    'excerpt' => Str::limit(trim($excerpt), 600, ''),
+                    'photo_url' => $featuredImage !== '' ? $featuredImage : null,
+                    'content' => $content !== '' ? $content : $excerpt,
+                    'status' => 'published',
+                    'published_at' => $publishedAt !== '' ? Carbon::parse($publishedAt) : now(),
+                ]
+            );
+
+            $count++;
+            $bar->advance();
+        }
+
+        $bar->finish();
+        $this->newLine();
+
+        return $count;
+    }
+
+    private function inferNoticeType(string $title, string $excerpt, string $sourceType): string
+    {
+        $haystack = Str::lower($title.' '.$excerpt);
+
+        if (Str::contains($haystack, 'familiebericht')) {
+            return MemorialNotice::TYPE_FAMILIEBERICHT;
+        }
+
+        if (Str::contains($haystack, 'rouwadvertentie')) {
+            return MemorialNotice::TYPE_ROUWADVERTENTIE;
+        }
+
+        if ($sourceType === 'ob_bericht') {
+            return MemorialNotice::TYPE_OVERLIJDENSBERICHT;
+        }
+
+        return MemorialNotice::TYPE_OVERLIJDENSBERICHT;
+    }
+
+    private function normalizePathFromUrl(string $url): ?string
+    {
+        if ($url === '') {
             return null;
-        }
-
-        $html = $response->body();
-
-        libxml_use_internal_errors(true);
-        $dom = new \DOMDocument();
-        $dom->loadHTML('<?xml encoding="utf-8" ?>'.$html);
-        $xpath = new \DOMXPath($dom);
-
-        $titleNode = $xpath->query('//title')->item(0);
-        $title = $titleNode ? trim($titleNode->textContent) : $url;
-
-        $metaDescription = '';
-        $metaNode = $xpath->query('//meta[@name="description"]')->item(0);
-        if ($metaNode instanceof \DOMElement) {
-            $metaDescription = trim((string) $metaNode->getAttribute('content'));
-        }
-
-        $mainNode = $xpath->query('//main')->item(0);
-        $bodyNode = $xpath->query('//body')->item(0);
-        $contentNode = $mainNode ?: $bodyNode;
-
-        if (!$contentNode) {
-            return null;
-        }
-
-        $contentHtml = '';
-        foreach ($contentNode->childNodes as $child) {
-            $contentHtml .= $dom->saveHTML($child);
         }
 
         $path = trim((string) parse_url($url, PHP_URL_PATH), '/');
@@ -176,12 +275,6 @@ class ImportWordpressPagesCommand extends Command
             return null;
         }
 
-        return [
-            'title' => $title,
-            'slug' => Str::slug(basename($path)),
-            'path' => $path,
-            'meta_description' => Str::limit($metaDescription, 190, ''),
-            'content_html' => $contentHtml,
-        ];
+        return $path;
     }
 }
