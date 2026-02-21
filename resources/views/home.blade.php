@@ -3,7 +3,7 @@
 @section('title', 'Overlijdensberichten')
 
 @section('content')
-    <section class="card" style="margin-bottom:14px;">
+    <section class="card notice-filter" style="margin-bottom:14px;">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
             <div>
                 <h1 style="margin:0 0 6px;">Laatste overlijdensberichten</h1>
@@ -27,15 +27,17 @@
         </form>
     </section>
 
-    <section class="notices-grid">
+    <section class="notices-grid notice-listings">
         @forelse($latestNotices as $notice)
             @php
                 $displayName = trim(($notice->deceased_first_name ?? '').' '.($notice->deceased_last_name ?? ''));
                 if ($displayName === '') {
                     $displayName = $notice->title;
                 }
+                $fallbackAvatar = 'https://ui-avatars.com/api/?name='.urlencode($displayName).'&background=e2e7ec&color=6b7580&size=256';
             @endphp
 
+            <a class="notice-card-link" href="{{ route('notice.show', $notice->slug) }}">
             <article class="notice-card">
                 <div class="notice-card__head">
                     <span class="notice-card__location">{{ $notice->city ?: ($notice->province ?: 'Onbekende locatie') }}</span>
@@ -43,7 +45,7 @@
                 <div class="notice-card__body">
                     <div class="notice-card__avatar-wrap">
                         @if($notice->photo_url)
-                            <img src="{{ $notice->photo_url }}" alt="Foto van {{ $displayName }}" class="notice-card__avatar">
+                            <img src="{{ $notice->photo_url }}" alt="Foto van {{ $displayName }}" class="notice-card__avatar" onerror="this.onerror=null;this.src='{{ $fallbackAvatar }}';">
                         @else
                             <div class="notice-card__avatar notice-card__avatar--placeholder"><i class="ph ph-user"></i></div>
                         @endif
@@ -58,6 +60,7 @@
                     </div>
                 </div>
             </article>
+            </a>
         @empty
             <article class="card">
                 @if($search !== '')
@@ -70,6 +73,13 @@
     </section>
 
     <style>
+        .notice-filter,
+        .notice-listings {
+            width: min(1080px, 100%);
+            margin-left: auto;
+            margin-right: auto;
+        }
+
         .notices-grid {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -86,6 +96,17 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+        }
+
+        .notice-card-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .notice-card-link:hover .notice-card {
+            box-shadow: 0 6px 18px rgba(0,0,0,0.16);
+            transform: translateY(-1px);
         }
 
         .notice-card__head {

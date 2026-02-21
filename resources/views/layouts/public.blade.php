@@ -6,11 +6,15 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="@yield('meta_description', 'Overlijdensberichten, familieberichten en rouwadvertenties.')">
     <title>@yield('title', 'overlijdens-berichten.nl')</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
     <style>
         :root { --bg:#f6f6f5; --card:#fff; --text:#1e1e1e; --line:#d9d9d7; --brand:#193a59; }
         * { box-sizing: border-box; }
-        body { margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, sans-serif; background: var(--bg); color: var(--text); }
+        body { margin: 0; font-family: Georgia, "Times New Roman", serif; background: var(--bg); color: var(--text); }
+        h1, h2, h3, h4, h5, h6 { font-family: "Merriweather", Georgia, serif; }
         .container { width: min(1200px, 92vw); margin: 0 auto; }
         .topbar { background: #fff; border-bottom: 1px solid var(--line); }
         .topbar-inner { display:flex; justify-content:space-between; align-items:center; padding:16px 0; }
@@ -30,6 +34,8 @@
     <div class="container topbar-inner">
         <a href="{{ route('home') }}" class="brand">overlijdens-berichten.nl</a>
         <nav class="menu">
+            <a href="{{ route('blog.index') }}"><i class="ph ph-newspaper"></i> Blog</a>
+            <a href="{{ route('cities.index') }}"><i class="ph ph-map-pin-area"></i> Steden</a>
             <a href="{{ route('notice.place') }}"><i class="ph ph-note-pencil"></i> Overlijdensbericht plaatsen</a>
             @auth
                 <a href="{{ route('account.dashboard') }}"><i class="ph ph-house"></i> Account</a>

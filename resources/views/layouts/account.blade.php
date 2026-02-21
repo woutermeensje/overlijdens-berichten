@@ -5,11 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Account') - overlijdens-berichten.nl</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
     <style>
         :root { --line:#dde1e6; --bg:#f4f6f8; --card:#fff; --sidebar:#0f2437; --accent:#1e4c73; }
         * { box-sizing: border-box; }
-        body { margin:0; font-family: Inter, system-ui, sans-serif; background:var(--bg); color:#1e2630; }
+        body { margin:0; font-family: Georgia, "Times New Roman", serif; background:var(--bg); color:#1e2630; }
+        h1, h2, h3, h4, h5, h6 { font-family: "Merriweather", Georgia, serif; }
         .shell { min-height:100vh; display:grid; grid-template-columns: 280px 1fr; }
         .sidebar { background:linear-gradient(180deg, #0f2437, #183852); color:#fff; padding:22px 16px; display:flex; flex-direction:column; }
         .brand { color:#fff; text-decoration:none; font-weight:700; font-size:20px; margin-bottom:16px; display:block; }

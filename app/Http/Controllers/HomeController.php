@@ -39,4 +39,16 @@ class HomeController extends Controller
     {
         return view('pages.place-notice');
     }
+
+    public function showNotice(string $slug)
+    {
+        $notice = MemorialNotice::query()
+            ->published()
+            ->where('slug', $slug)
+            ->firstOrFail();
+
+        return view('notices.show', [
+            'notice' => $notice,
+        ]);
+    }
 }

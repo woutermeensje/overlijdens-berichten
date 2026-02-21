@@ -5,8 +5,8 @@ namespace App\Console\Commands;
 use App\Models\ContentPage;
 use App\Models\MemorialNotice;
 use App\Models\User;
-use Illuminate\Support\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
@@ -34,41 +34,8 @@ class ImportWordpressPagesCommand extends Command
             'status' => 'publish',
         ], $limit);
 
-        if ($pages === []) {
-            $this->warn('Geen pagina\'s gevonden of endpoint niet bereikbaar.');
-        }
-
         $this->info('Te importeren pagina\'s: '.count($pages));
-        $bar = $this->output->createProgressBar(count($pages));
-        $bar->start();
-        $importedPages = 0;
-
-        foreach ($pages as $page) {
-            $payload = $this->normalizeWpContentToPagePayload($page);
-            if ($payload === null) {
-                $bar->advance();
-                continue;
-            }
-
-            ContentPage::query()->updateOrCreate(
-                ['path' => $payload['path']],
-                [
-                    'title' => $payload['title'],
-                    'slug' => $payload['slug'],
-                    'source_url' => $payload['source_url'],
-                    'meta_description' => $payload['meta_description'],
-                    'content_html' => $payload['content_html'],
-                    'is_active' => true,
-                    'is_imported' => true,
-                ]
-            );
-
-            $importedPages++;
-            $bar->advance();
-        }
-
-        $bar->finish();
-        $this->newLine();
+        $importedPages = $this->importPages($pages);
         $this->info('Pagina\'s geimporteerd: '.$importedPages);
 
         $importedPosts = 0;
@@ -79,6 +46,9 @@ class ImportWordpressPagesCommand extends Command
                 ['email' => 'import-bot@overlijdens-berichten.nl'],
                 ['name' => 'WordPress Import Bot', 'password' => bcrypt(Str::random(24))]
             );
+
+            // Reset eerdere import-bot berichten, daarna bouwen we de juiste set opnieuw op.
+            MemorialNotice::query()->where('user_id', $importUser->id)->delete();
 
             if ($withPosts) {
                 $posts = $this->fetchWpCollection($baseUrl.'/wp-json/wp/v2/posts', [
@@ -112,6 +82,43 @@ class ImportWordpressPagesCommand extends Command
         $this->line('- ob_bericht: '.$importedObituaries);
 
         return self::SUCCESS;
+    }
+
+    private function importPages(array $pages): int
+    {
+        $count = 0;
+        $bar = $this->output->createProgressBar(count($pages));
+        $bar->start();
+
+        foreach ($pages as $page) {
+            $payload = $this->normalizeWpContentToPagePayload($page);
+            if ($payload === null) {
+                $bar->advance();
+                continue;
+            }
+
+            ContentPage::query()->updateOrCreate(
+                ['path' => $payload['path']],
+                [
+                    'title' => $payload['title'],
+                    'slug' => $payload['slug'],
+                    'source_url' => $payload['source_url'],
+                    'meta_description' => $payload['meta_description'],
+                    'content_html' => $payload['content_html'],
+                    'content_type' => 'page',
+                    'is_active' => true,
+                    'is_imported' => true,
+                ]
+            );
+
+            $count++;
+            $bar->advance();
+        }
+
+        $bar->finish();
+        $this->newLine();
+
+        return $count;
     }
 
     /**
@@ -186,6 +193,21 @@ class ImportWordpressPagesCommand extends Command
         $bar->start();
 
         foreach ($items as $item) {
+            $slug = trim((string) ($item['slug'] ?? ''));
+            $title = strip_tags(html_entity_decode((string) data_get($item, 'title.rendered', '')));
+            if ($slug === '' || $title === '') {
+                $bar->advance();
+                continue;
+            }
+
+            $excerpt = strip_tags(html_entity_decode((string) data_get($item, 'excerpt.rendered', '')));
+            $content = (string) data_get($item, 'content.rendered', '');
+            $publishedAt = (string) ($item['date_gmt'] ?? $item['date'] ?? '');
+            $featuredImage = (string) data_get($item, '_embedded.wp:featuredmedia.0.source_url', '');
+
+            $isNameRecord = $sourceType === 'ob_bericht' || $this->looksLikePersonName($title);
+            $contentType = $isNameRecord ? 'memorial-source' : 'blog';
+
             $pagePayload = $this->normalizeWpContentToPagePayload($item);
             if ($pagePayload !== null) {
                 ContentPage::query()->updateOrCreate(
@@ -196,46 +218,38 @@ class ImportWordpressPagesCommand extends Command
                         'source_url' => $pagePayload['source_url'],
                         'meta_description' => $pagePayload['meta_description'],
                         'content_html' => $pagePayload['content_html'],
+                        'content_type' => $contentType,
                         'is_active' => true,
                         'is_imported' => true,
                     ]
                 );
             }
 
-            $slug = trim((string) ($item['slug'] ?? ''));
-            $title = strip_tags(html_entity_decode((string) data_get($item, 'title.rendered', '')));
-            if ($slug === '' || $title === '') {
-                $bar->advance();
-                continue;
+            if ($isNameRecord) {
+                $fullName = preg_replace('/\s+/', ' ', trim($title)) ?? $title;
+                $parts = preg_split('/\s+/', $fullName) ?: [];
+                $firstName = $parts[0] ?? null;
+                $lastName = count($parts) > 1 ? implode(' ', array_slice($parts, 1)) : null;
+
+                MemorialNotice::query()->updateOrCreate(
+                    ['slug' => $slug],
+                    [
+                        'user_id' => $user->id,
+                        'title' => $title,
+                        'type' => $this->inferNoticeType($title, $excerpt, $sourceType),
+                        'deceased_first_name' => $firstName,
+                        'deceased_last_name' => $lastName,
+                        'excerpt' => Str::limit(trim($excerpt), 600, ''),
+                        'photo_url' => $featuredImage !== '' ? $featuredImage : null,
+                        'content' => $content !== '' ? $content : $excerpt,
+                        'status' => 'published',
+                        'published_at' => $publishedAt !== '' ? Carbon::parse($publishedAt) : now(),
+                    ]
+                );
+
+                $count++;
             }
 
-            $fullName = preg_replace('/\s+/', ' ', trim($title)) ?? $title;
-            $parts = preg_split('/\s+/', $fullName) ?: [];
-            $firstName = $parts[0] ?? null;
-            $lastName = count($parts) > 1 ? implode(' ', array_slice($parts, 1)) : null;
-
-            $excerpt = strip_tags(html_entity_decode((string) data_get($item, 'excerpt.rendered', '')));
-            $content = (string) data_get($item, 'content.rendered', '');
-            $publishedAt = (string) ($item['date_gmt'] ?? $item['date'] ?? '');
-            $featuredImage = (string) data_get($item, '_embedded.wp:featuredmedia.0.source_url', '');
-
-            MemorialNotice::query()->updateOrCreate(
-                ['slug' => $slug],
-                [
-                    'user_id' => $user->id,
-                    'title' => $title,
-                    'type' => $this->inferNoticeType($title, $excerpt, $sourceType),
-                    'deceased_first_name' => $firstName,
-                    'deceased_last_name' => $lastName,
-                    'excerpt' => Str::limit(trim($excerpt), 600, ''),
-                    'photo_url' => $featuredImage !== '' ? $featuredImage : null,
-                    'content' => $content !== '' ? $content : $excerpt,
-                    'status' => 'published',
-                    'published_at' => $publishedAt !== '' ? Carbon::parse($publishedAt) : now(),
-                ]
-            );
-
-            $count++;
             $bar->advance();
         }
 
@@ -243,6 +257,38 @@ class ImportWordpressPagesCommand extends Command
         $this->newLine();
 
         return $count;
+    }
+
+    private function looksLikePersonName(string $title): bool
+    {
+        $plain = trim($title);
+        if ($plain === '' || mb_strlen($plain) > 80) {
+            return false;
+        }
+
+        if (preg_match('/[0-9\?\!\:\;\(\)]/u', $plain)) {
+            return false;
+        }
+
+        $words = preg_split('/\s+/u', $plain) ?: [];
+        $wordCount = count($words);
+        if ($wordCount < 2 || $wordCount > 5) {
+            return false;
+        }
+
+        $blocked = [
+            'wat', 'hoe', 'waarom', 'tips', 'top', 'privacyregels', 'rondom', 'in', 'nederland',
+            'overlijdensbericht', 'overlijdensberichten', 'crematorium', 'begraafplaats', 'uitvaart',
+        ];
+
+        foreach ($words as $word) {
+            $normalized = Str::lower(trim($word, " .,-'\""));
+            if (in_array($normalized, $blocked, true)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private function inferNoticeType(string $title, string $excerpt, string $sourceType): string

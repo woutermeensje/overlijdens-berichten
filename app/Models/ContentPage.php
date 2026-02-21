@@ -16,6 +16,7 @@ class ContentPage extends Model
         'source_url',
         'meta_description',
         'content_html',
+        'content_type',
         'is_active',
         'is_imported',
     ];
