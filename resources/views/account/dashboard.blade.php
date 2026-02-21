@@ -3,12 +3,21 @@
 @section('title', 'Dashboard')
 
 @section('content')
-    <h1 style="margin-top:0;">Dashboard</h1>
-    <p style="color:#58656f;">Beheer je overlijdensberichten, familieberichten en rouwadvertenties.</p>
+    <h1 class="text-2xl font-semibold mb-2">Dashboard</h1>
+    <p class="text-base-content/70 mb-4">Beheer je overlijdensberichten, familieberichten en rouwadvertenties.</p>
 
-    <div class="grid" style="grid-template-columns: repeat(3, minmax(0, 1fr)); margin:16px 0;">
-        <div style="border:1px solid #dde1e6;border-radius:12px;padding:12px;"><strong>{{ $notices->count() }}</strong><br>Totaal berichten</div>
-        <div style="border:1px solid #dde1e6;border-radius:12px;padding:12px;"><strong>{{ $notices->where('type', 'overlijdensbericht')->count() }}</strong><br>Overlijdensberichten</div>
-        <div style="border:1px solid #dde1e6;border-radius:12px;padding:12px;"><strong>{{ $notices->where('type', 'rouwadvertentie')->count() }}</strong><br>Rouwadvertenties</div>
+    <div class="stats stats-vertical lg:stats-horizontal shadow w-full border border-base-300">
+        <div class="stat">
+            <div class="stat-title">Totaal berichten</div>
+            <div class="stat-value text-primary">{{ $notices->count() }}</div>
+        </div>
+        <div class="stat">
+            <div class="stat-title">Overlijdensberichten</div>
+            <div class="stat-value text-secondary">{{ $notices->where('type', 'overlijdensbericht')->count() }}</div>
+        </div>
+        <div class="stat">
+            <div class="stat-title">Rouwadvertenties</div>
+            <div class="stat-value">{{ $notices->where('type', 'rouwadvertentie')->count() }}</div>
+        </div>
     </div>
 @endsection
