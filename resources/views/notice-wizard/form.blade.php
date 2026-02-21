@@ -19,25 +19,25 @@
 
     <section class="max-w-4xl mx-auto space-y-5">
         <article class="card bg-base-100 border border-base-300 shadow-md overflow-hidden">
-            <div class="bg-base-200/60 border-b border-base-300 p-6">
+            <div class="bg-base-200/60 border-b border-base-300 p-4 sm:p-6">
                 <div class="flex flex-wrap items-start justify-between gap-3">
                     <div class="space-y-2">
-                        <h1 class="text-3xl font-semibold leading-tight">Bericht plaatsen</h1>
-                        <p class="text-base-content/70">In 3 stappen plaats je gratis een overlijdensbericht, familiebericht of rouwadvertentie.</p>
+                        <h1 class="text-2xl sm:text-3xl font-semibold leading-tight">Bericht plaatsen</h1>
+                        <p class="text-sm sm:text-base text-base-content/70">In 3 stappen plaats je gratis een overlijdensbericht, familiebericht of rouwadvertentie.</p>
                     </div>
                     <span class="badge badge-outline">Gratis pakket</span>
                 </div>
-                <ul class="steps w-full mt-5">
+                <ul class="steps w-full mt-4 sm:mt-5">
                     <li class="step {{ $step >= 1 ? 'step-primary' : '' }}">Gegevens</li>
                     <li class="step {{ $step >= 2 ? 'step-primary' : '' }}">Bericht</li>
                     <li class="step {{ $step >= 3 ? 'step-primary' : '' }}">Controle</li>
                 </ul>
             </div>
 
-            <div class="card-body space-y-6 p-6 md:p-8">
+            <div class="card-body space-y-6 p-4 sm:p-6 md:p-8">
                 <header class="space-y-1">
-                    <h2 class="text-2xl font-semibold">{{ $stepTitle }}</h2>
-                    <p class="text-base-content/70">{{ $stepDescription }}</p>
+                    <h2 class="text-xl sm:text-2xl font-semibold">{{ $stepTitle }}</h2>
+                    <p class="text-sm sm:text-base text-base-content/70">{{ $stepDescription }}</p>
                 </header>
 
                 @if($errors->any())
@@ -51,35 +51,35 @@
                     <input type="hidden" name="step" value="{{ $step }}">
 
                     @if ($step === 1)
-                        <div class="rounded-box border border-base-300 bg-base-100 p-4 md:p-5 space-y-4">
+                        <div class="rounded-box border border-base-300 bg-base-100 p-4 md:p-5 space-y-4 shadow-sm">
                             <h3 class="text-lg font-semibold">Persoonsgegevens</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <label class="form-control w-full">
-                                    <span class="label-text font-medium">Voornaam</span>
+                                    <span class="label-text font-medium text-sm">Voornaam</span>
                                     <input class="input input-bordered w-full" name="deceased_first_name" value="{{ old('deceased_first_name', $data['deceased_first_name'] ?? '') }}" required>
                                 </label>
                                 <label class="form-control w-full">
-                                    <span class="label-text font-medium">Achternaam</span>
+                                    <span class="label-text font-medium text-sm">Achternaam</span>
                                     <input class="input input-bordered w-full" name="deceased_last_name" value="{{ old('deceased_last_name', $data['deceased_last_name'] ?? '') }}" required>
                                 </label>
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <label class="form-control w-full">
-                                    <span class="label-text font-medium">Geboortedatum</span>
+                                    <span class="label-text font-medium text-sm">Geboortedatum</span>
                                     <input type="date" class="input input-bordered w-full" name="born_date" value="{{ old('born_date', $data['born_date'] ?? '') }}" required>
                                 </label>
                                 <label class="form-control w-full">
-                                    <span class="label-text font-medium">Overlijdensdatum</span>
+                                    <span class="label-text font-medium text-sm">Overlijdensdatum</span>
                                     <input type="date" class="input input-bordered w-full" name="died_date" value="{{ old('died_date', $data['died_date'] ?? '') }}" required>
                                 </label>
                             </div>
                         </div>
 
-                        <div class="rounded-box border border-base-300 bg-base-100 p-4 md:p-5 space-y-4">
+                        <div class="rounded-box border border-base-300 bg-base-100 p-4 md:p-5 space-y-4 shadow-sm">
                             <h3 class="text-lg font-semibold">Portretfoto</h3>
                             <label class="form-control w-full">
-                                <span class="label-text font-medium">Foto (optioneel)</span>
+                                <span class="label-text font-medium text-sm">Foto (optioneel)</span>
                                 <input type="file" class="file-input file-input-bordered w-full" name="photo" accept="image/jpeg,image/png,image/webp">
                                 <span class="label-text-alt text-base-content/60">JPG, PNG of WEBP, maximaal 5MB</span>
                             </label>
@@ -98,11 +98,11 @@
                     @endif
 
                     @if ($step === 2)
-                        <div class="rounded-box border border-base-300 bg-base-100 p-4 md:p-5 space-y-4">
+                        <div class="rounded-box border border-base-300 bg-base-100 p-4 md:p-5 space-y-4 shadow-sm">
                             <h3 class="text-lg font-semibold">Type en locatie</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <label class="form-control w-full md:col-span-2">
-                                    <span class="label-text font-medium">Type bericht</span>
+                                    <span class="label-text font-medium text-sm">Type bericht</span>
                                     <select name="type" class="select select-bordered w-full" required>
                                         @foreach (['overlijdensbericht' => 'Overlijdensbericht', 'familiebericht' => 'Familiebericht', 'rouwadvertentie' => 'Rouwadvertentie'] as $value => $label)
                                             <option value="{{ $value }}" @selected(old('type', $data['type'] ?? '') === $value)>{{ $label }}</option>
@@ -111,37 +111,37 @@
                                 </label>
 
                                 <label class="form-control w-full">
-                                    <span class="label-text font-medium">Stad</span>
+                                    <span class="label-text font-medium text-sm">Stad</span>
                                     <input class="input input-bordered w-full" name="city" value="{{ old('city', $data['city'] ?? '') }}" required>
                                 </label>
                                 <label class="form-control w-full">
-                                    <span class="label-text font-medium">Provincie</span>
+                                    <span class="label-text font-medium text-sm">Provincie</span>
                                     <input class="input input-bordered w-full" name="province" value="{{ old('province', $data['province'] ?? '') }}" required>
                                 </label>
                             </div>
                         </div>
 
-                        <div class="rounded-box border border-base-300 bg-base-100 p-4 md:p-5 space-y-4">
+                        <div class="rounded-box border border-base-300 bg-base-100 p-4 md:p-5 space-y-4 shadow-sm">
                             <h3 class="text-lg font-semibold">Inhoud</h3>
                             <label class="form-control w-full">
-                                <span class="label-text font-medium">Titel (optioneel)</span>
+                                <span class="label-text font-medium text-sm">Titel (optioneel)</span>
                                 <input class="input input-bordered w-full" name="title" value="{{ old('title', $data['title'] ?? '') }}" placeholder="Laat leeg voor automatische naam">
                             </label>
 
                             <label class="form-control w-full">
-                                <span class="label-text font-medium">Korte intro (optioneel)</span>
+                                <span class="label-text font-medium text-sm">Korte intro (optioneel)</span>
                                 <textarea class="textarea textarea-bordered w-full" name="excerpt" rows="3">{{ old('excerpt', $data['excerpt'] ?? '') }}</textarea>
                             </label>
 
                             <label class="form-control w-full">
-                                <span class="label-text font-medium">Berichttekst</span>
+                                <span class="label-text font-medium text-sm">Berichttekst</span>
                                 <textarea class="textarea textarea-bordered w-full min-h-44" name="content" rows="8" required>{{ old('content', $data['content'] ?? '') }}</textarea>
                             </label>
                         </div>
                     @endif
 
                     @if ($step === 3)
-                        <div class="rounded-box border border-base-300 bg-base-100 p-4 md:p-5 space-y-4">
+                        <div class="rounded-box border border-base-300 bg-base-100 p-4 md:p-5 space-y-4 shadow-sm">
                             <h3 class="text-lg font-semibold">Samenvatting</h3>
                             <div class="stats stats-vertical md:stats-horizontal shadow-sm border border-base-300 w-full">
                                 <div class="stat">
@@ -169,6 +169,12 @@
                                                 <img src="{{ $data['photo_url'] }}" alt="Foto van {{ $displayName }}">
                                             </div>
                                         </div>
+                                    @else
+                                        <div class="avatar placeholder">
+                                            <div class="w-16 rounded-full bg-base-300 text-base-content/50">
+                                                <span class="text-xs">Geen foto</span>
+                                            </div>
+                                        </div>
                                     @endif
                                     <div class="space-y-2">
                                         <h2 class="card-title text-lg">{{ $data['title'] ?: $displayName }}</h2>
@@ -182,17 +188,17 @@
                         </div>
                     @endif
 
-                    <div class="flex justify-between items-center gap-3 pt-2 border-t border-base-300">
+                    <div class="flex flex-col-reverse sm:flex-row justify-between sm:items-center gap-3 pt-3 border-t border-base-300">
                         @if($step > 1)
-                            <button type="submit" name="action" value="back" class="btn btn-ghost">Terug</button>
+                            <button type="submit" name="action" value="back" class="btn btn-ghost w-full sm:w-auto">Terug</button>
                         @else
                             <span></span>
                         @endif
 
                         @if($step < 3)
-                            <button type="submit" name="action" value="next" class="btn btn-primary min-w-44">Verder naar stap {{ $step + 1 }}</button>
+                            <button type="submit" name="action" value="next" class="btn btn-primary w-full sm:w-auto sm:min-w-44">Verder naar stap {{ $step + 1 }}</button>
                         @else
-                            <button type="submit" name="action" value="publish" class="btn btn-primary min-w-44">Bericht publiceren</button>
+                            <button type="submit" name="action" value="publish" class="btn btn-primary w-full sm:w-auto sm:min-w-44">Bericht publiceren</button>
                         @endif
                     </div>
                 </form>
