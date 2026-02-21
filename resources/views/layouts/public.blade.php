@@ -38,12 +38,11 @@
                     <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-72 border border-base-300">
                         <li><a href="{{ route('blog.index') }}"><i class="ph ph-newspaper"></i> Blog</a></li>
                         <li><a href="{{ route('cities.index') }}"><i class="ph ph-map-pin-area"></i> Steden</a></li>
-                        <li><a href="{{ route('notice.place') }}"><i class="ph ph-note-pencil"></i> Overlijdensbericht plaatsen</a></li>
+                        <li><a href="{{ route('notice.wizard') }}"><i class="ph ph-note-pencil"></i> Bericht plaatsen</a></li>
                         @auth
                             <li><a href="{{ route('account.dashboard') }}"><i class="ph ph-house"></i> Account</a></li>
                         @else
-                            <li><a href="{{ route('login') }}"><i class="ph ph-sign-in"></i> Inloggen</a></li>
-                            <li><a href="{{ route('register') }}"><i class="ph ph-user-plus"></i> Account aanmaken</a></li>
+                            <li><a href="{{ route('login') }}"><i class="ph ph-sign-in"></i> Inloggen (uitvaartondernemer)</a></li>
                         @endauth
                     </ul>
                 </div>
@@ -53,7 +52,7 @@
                 <ul class="menu menu-horizontal px-1 gap-1">
                     <li><a href="{{ route('blog.index') }}"><i class="ph ph-newspaper"></i> Blog</a></li>
                     <li><a href="{{ route('cities.index') }}"><i class="ph ph-map-pin-area"></i> Steden</a></li>
-                    <li><a href="{{ route('notice.place') }}"><i class="ph ph-note-pencil"></i> Overlijdensbericht plaatsen</a></li>
+                    <li><a href="{{ route('notice.wizard') }}"><i class="ph ph-note-pencil"></i> Bericht plaatsen</a></li>
                 </ul>
             </div>
             <div class="navbar-end gap-2">
@@ -64,8 +63,8 @@
                         <button type="submit" class="btn btn-outline btn-sm"><i class="ph ph-sign-out"></i> <span class="hidden sm:inline">Uitloggen</span></button>
                     </form>
                 @else
-                    <a href="{{ route('login') }}" class="btn btn-ghost btn-sm hidden sm:inline-flex"><i class="ph ph-sign-in"></i> Inloggen</a>
-                    <a href="{{ route('register') }}" class="btn btn-primary btn-sm"><i class="ph ph-user-plus"></i> <span class="hidden sm:inline">Account aanmaken</span></a>
+                    <a href="{{ route('login') }}" class="btn btn-ghost btn-sm hidden sm:inline-flex"><i class="ph ph-sign-in"></i> Inloggen ondernemer</a>
+                    <a href="{{ route('notice.wizard') }}" class="btn btn-primary btn-sm"><i class="ph ph-note-pencil"></i> <span class="hidden sm:inline">Bericht plaatsen</span></a>
                 @endauth
             </div>
         </div>

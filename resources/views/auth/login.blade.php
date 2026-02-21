@@ -1,11 +1,12 @@
 @extends('layouts.public')
 
-@section('title', 'Inloggen')
+@section('title', 'Inloggen voor uitvaartondernemers')
 
 @section('content')
     <section class="card bg-base-100 border border-base-300 shadow-sm max-w-xl mx-auto">
         <div class="card-body">
-            <h1 class="card-title text-2xl">Inloggen</h1>
+            <h1 class="card-title text-2xl">Inloggen voor uitvaartondernemers</h1>
+            <p class="text-base-content/70">Deze omgeving is bedoeld voor ondernemers die namens clienten berichten plaatsen.</p>
 
             <form method="post" action="{{ route('login.attempt') }}" class="space-y-4">
                 @csrf

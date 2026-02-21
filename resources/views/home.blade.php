@@ -10,7 +10,7 @@
                     <h1 class="card-title text-2xl">Laatste overlijdensberichten</h1>
                     <p class="text-base-content/70">Zoek op naam, voornaam of locatie.</p>
                 </div>
-                <a href="{{ route('notice.place') }}" class="btn btn-primary">Overlijdensbericht plaatsen</a>
+                <a href="{{ route('notice.wizard') }}" class="btn btn-primary">Bericht plaatsen</a>
             </div>
 
             <form method="get" action="{{ route('home') }}" class="join w-full">

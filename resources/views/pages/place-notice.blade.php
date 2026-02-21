@@ -15,12 +15,12 @@
                         <div class="badge badge-success">€ 0,00</div>
                     </div>
                     <ul class="list-disc list-inside text-base-content/80 space-y-1">
-                        <li>Publiceer overlijdensbericht, familiebericht of rouwadvertentie</li>
-                        <li>Bericht direct zichtbaar in het overzicht</li>
-                        <li>Zelf beheren via je account</li>
+                        <li>Publiceer overlijdensbericht, familiebericht of rouwadvertentie in 3 stappen</li>
+                        <li>Geen account nodig voor particulieren</li>
+                        <li>Uitvaartondernemers kunnen inloggen voor beheer van clientberichten</li>
                     </ul>
                     <div>
-                        <a href="{{ route('register') }}" class="btn btn-primary">Bericht plaatsen</a>
+                        <a href="{{ route('notice.wizard') }}" class="btn btn-primary">Start met plaatsen</a>
                     </div>
                 </div>
             </div>

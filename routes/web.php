@@ -7,11 +7,14 @@ use App\Http\Controllers\CityController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\PublicNoticeWizardController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/overlijdensbericht-plaatsen', [HomeController::class, 'placeNotice'])->name('notice.place');
 Route::get('/overlijdensbericht/{slug}', [HomeController::class, 'showNotice'])->name('notice.show');
+Route::get('/bericht-plaatsen', [PublicNoticeWizardController::class, 'show'])->name('notice.wizard');
+Route::post('/bericht-plaatsen', [PublicNoticeWizardController::class, 'submit'])->name('notice.wizard.submit');
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 Route::get('/steden', [CityController::class, 'index'])->name('cities.index');
