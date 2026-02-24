@@ -4,6 +4,7 @@ use App\Http\Controllers\AccountNoticeController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CityController;
+use App\Http\Controllers\CityLandingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PageController;
@@ -35,6 +36,14 @@ Route::middleware('auth')->group(function (): void {
 
     Route::post('/uitloggen', [AuthController::class, 'logout'])->name('logout');
 });
+
+Route::get('/{city}/crematorium', [CityLandingController::class, 'crematorium'])
+    ->where('city', '[A-Za-z0-9\-]+')
+    ->name('city.crematorium');
+
+Route::get('/{city}', [CityLandingController::class, 'city'])
+    ->where('city', '[A-Za-z0-9\-]+')
+    ->name('city.show');
 
 Route::get('/{path}', [PageController::class, 'show'])
     ->where('path', '.*')

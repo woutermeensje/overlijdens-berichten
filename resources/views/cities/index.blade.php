@@ -5,8 +5,8 @@
 @section('content')
     <section class="card bg-base-100 border border-base-300 shadow-sm mb-4">
         <div class="card-body">
-            <h1 class="card-title text-2xl">Alle steden met pagina's</h1>
-            <p class="text-base-content/70">Overzicht van steden waarvoor er pagina's beschikbaar zijn.</p>
+            <h1 class="card-title text-2xl">Alle steden met overlijdensberichten</h1>
+            <p class="text-base-content/70">Overzicht van steden met een eigen landingspagina.</p>
         </div>
     </section>
 
@@ -15,14 +15,14 @@
             <article class="card bg-base-100 border border-base-300 shadow-sm">
                 <div class="card-body">
                     <h2 class="card-title">{{ $city['name'] }}</h2>
-                    <p class="text-base-content/70">{{ $city['count'] }} pagina{{ $city['count'] === 1 ? '' : 's' }}</p>
+                    <p class="text-base-content/70">{{ $city['count'] }} bericht{{ $city['count'] === 1 ? '' : 'en' }}</p>
                     <div class="card-actions justify-end">
-                        <a href="/{{ $city['example_path'] }}" class="btn btn-primary btn-sm">Bekijk voorbeeldpagina</a>
+                        <a href="{{ route('city.show', ['city' => $city['slug']]) }}" class="btn btn-primary btn-sm">Bekijk stadspagina</a>
                     </div>
                 </div>
             </article>
         @empty
-            <article class="card bg-base-100 border border-base-300"><div class="card-body">Er zijn nog geen stadspagina's gevonden.</div></article>
+            <article class="card bg-base-100 border border-base-300"><div class="card-body">Er zijn nog geen steden met berichten gevonden.</div></article>
         @endforelse
     </section>
 @endsection

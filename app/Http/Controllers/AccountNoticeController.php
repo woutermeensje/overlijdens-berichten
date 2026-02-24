@@ -13,7 +13,11 @@ class AccountNoticeController extends Controller
 {
     public function index(): View
     {
-        $notices = auth()->user()->memorialNotices()->latest('created_at')->get();
+        $user = auth()->user();
+
+        $notices = $user->isAdmin()
+            ? MemorialNotice::query()->latest('created_at')->get()
+            : $user->memorialNotices()->latest('created_at')->get();
 
         return view('account.notices.index', [
             'notices' => $notices,
@@ -136,6 +140,12 @@ class AccountNoticeController extends Controller
 
     private function ensureOwner(MemorialNotice $notice): void
     {
-        abort_unless($notice->user_id === auth()->id(), 403);
+        $user = auth()->user();
+
+        if ($user->isAdmin()) {
+            return;
+        }
+
+        abort_unless($notice->user_id === $user->id, 403);
     }
 }

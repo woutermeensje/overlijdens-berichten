@@ -8,9 +8,9 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
 
-        $notices = $user->memorialNotices()
-            ->latest('created_at')
-            ->get();
+        $notices = $user->isAdmin()
+            ? \App\Models\MemorialNotice::query()->latest('created_at')->get()
+            : $user->memorialNotices()->latest('created_at')->get();
 
         return view('account.dashboard', [
             'notices' => $notices,
