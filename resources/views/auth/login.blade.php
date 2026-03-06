@@ -1,6 +1,8 @@
 @extends('layouts.public')
 
 @section('title', 'Inloggen voor uitvaartondernemers')
+@section('meta_description', 'Inloggen voor uitvaartondernemers om overlijdensberichten en rouwadvertenties te beheren.')
+@section('meta_robots', 'noindex,nofollow')
 
 @section('content')
     <section class="card bg-base-100 border border-base-300 shadow-sm max-w-xl mx-auto">

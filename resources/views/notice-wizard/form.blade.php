@@ -1,6 +1,8 @@
 @extends('layouts.public')
 
 @section('title', 'Bericht plaatsen')
+@section('meta_description', 'Doorloop 3 stappen om gratis een overlijdensbericht, familiebericht of rouwadvertentie te publiceren.')
+@section('meta_robots', 'noindex,follow')
 
 @section('content')
     @php

@@ -1,6 +1,7 @@
 @extends('layouts.public')
 
-@section('title', 'Alle steden')
+@section('title', 'Overlijdensberichten per stad')
+@section('meta_description', 'Bekijk het overzicht van steden met een eigen pagina voor overlijdensberichten, familieberichten en rouwadvertenties.')
 
 @section('content')
     <section class="card bg-base-100 border border-base-300 shadow-sm mb-4">

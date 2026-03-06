@@ -1,13 +1,34 @@
 @extends('layouts.public')
 
-@section('title', $notice->title)
+@php
+    $seoDisplayName = trim(($notice->deceased_first_name ?? '').' '.($notice->deceased_last_name ?? ''));
+    if ($seoDisplayName === '') {
+        $seoDisplayName = $notice->title;
+    }
+@endphp
+
+@section('title', $seoDisplayName.' - overlijdensbericht'.($notice->city ? ' in '.$notice->city : ''))
+@section('meta_description', \Illuminate\Support\Str::limit(($notice->excerpt ? strip_tags($notice->excerpt).' ' : '').'Lees het overlijdensbericht van '.$seoDisplayName.($notice->city ? ' uit '.$notice->city : '').'.', 155))
+@section('og_type', 'article')
+
+@section('structured_data')
+    <script type="application/ld+json">
+        {!! json_encode([
+            '@context' => 'https://schema.org',
+            '@type' => 'Article',
+            'headline' => $notice->title,
+            'description' => \Illuminate\Support\Str::limit(strip_tags($notice->excerpt ?: $notice->content), 155),
+            'datePublished' => optional($notice->published_at)->toAtomString(),
+            'dateModified' => optional($notice->updated_at)->toAtomString(),
+            'mainEntityOfPage' => url()->current(),
+            'inLanguage' => 'nl-NL',
+        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+    </script>
+@endsection
 
 @section('content')
     @php
-        $displayName = trim(($notice->deceased_first_name ?? '').' '.($notice->deceased_last_name ?? ''));
-        if ($displayName === '') {
-            $displayName = $notice->title;
-        }
+        $displayName = $seoDisplayName;
         $fallbackAvatar = 'https://ui-avatars.com/api/?name='.urlencode($displayName).'&background=e2e7ec&color=6b7580&size=256';
     @endphp
 

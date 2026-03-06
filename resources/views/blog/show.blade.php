@@ -1,7 +1,22 @@
 @extends('layouts.public')
 
 @section('title', $post->title)
-@section('meta_description', $post->meta_description ?: 'Blog artikel')
+@section('meta_description', $post->meta_description ?: \Illuminate\Support\Str::limit(strip_tags($post->content_html), 155, '...'))
+@section('og_type', 'article')
+
+@section('structured_data')
+    <script type="application/ld+json">
+        {!! json_encode([
+            '@context' => 'https://schema.org',
+            '@type' => 'BlogPosting',
+            'headline' => $post->title,
+            'description' => $post->meta_description ?: \Illuminate\Support\Str::limit(strip_tags($post->content_html), 155, '...'),
+            'mainEntityOfPage' => url()->current(),
+            'dateModified' => optional($post->updated_at)->toAtomString(),
+            'inLanguage' => 'nl-NL',
+        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+    </script>
+@endsection
 
 @section('content')
     <article class="card bg-base-100 border border-base-300 shadow-sm">

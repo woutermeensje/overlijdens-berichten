@@ -1,6 +1,17 @@
 @extends('layouts.public')
 
-@section('title', 'Blog')
+@section('title', 'Blog over overlijden en uitvaart')
+@section('meta_description', 'Lees praktische en informatieve artikelen over overlijden, uitvaart en rouwverwerking.')
+@section('canonical_url', $posts->currentPage() > 1 ? $posts->url($posts->currentPage()) : route('blog.index'))
+
+@push('head')
+    @if($posts->previousPageUrl())
+        <link rel="prev" href="{{ $posts->previousPageUrl() }}">
+    @endif
+    @if($posts->nextPageUrl())
+        <link rel="next" href="{{ $posts->nextPageUrl() }}">
+    @endif
+@endpush
 
 @section('content')
     <section class="card bg-base-100 border border-base-300 shadow-sm mb-4">

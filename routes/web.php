@@ -9,9 +9,12 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PublicNoticeWizardController;
+use App\Http\Controllers\RegionSubscriptionController;
+use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::get('/overlijdensbericht-plaatsen', [HomeController::class, 'placeNotice'])->name('notice.place');
 Route::get('/overlijdensbericht/{slug}', [HomeController::class, 'showNotice'])->name('notice.show');
 Route::get('/bericht-plaatsen', [PublicNoticeWizardController::class, 'show'])->name('notice.wizard');
@@ -19,6 +22,8 @@ Route::post('/bericht-plaatsen', [PublicNoticeWizardController::class, 'submit']
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 Route::get('/steden', [CityController::class, 'index'])->name('cities.index');
+Route::post('/nieuwsbrief/aanmelden', [RegionSubscriptionController::class, 'store'])->name('newsletter.subscribe');
+Route::get('/nieuwsbrief/afmelden/{token}', [RegionSubscriptionController::class, 'destroy'])->name('newsletter.unsubscribe');
 
 Route::middleware('guest')->group(function (): void {
     Route::get('/inloggen', [AuthController::class, 'showLogin'])->name('login');

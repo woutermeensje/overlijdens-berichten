@@ -1,11 +1,54 @@
 <!doctype html>
 <html lang="nl" data-theme="memorial">
 <head>
+    @php
+        $configuredSiteName = trim((string) config('app.name', ''));
+        $siteName = $configuredSiteName !== '' && $configuredSiteName !== 'Laravel'
+            ? $configuredSiteName
+            : 'overlijdens-berichten.nl';
+        $defaultDescription = 'Overlijdensberichten, familieberichten en rouwadvertenties.';
+        $pageTitle = trim($__env->yieldContent('title'));
+        $title = $pageTitle !== '' ? $pageTitle.' | '.$siteName : $siteName;
+        $description = trim($__env->yieldContent('meta_description')) ?: $defaultDescription;
+        $robots = trim($__env->yieldContent('meta_robots'));
+
+        if ($robots === '') {
+            $robots = request()->has('q')
+                ? 'noindex,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1'
+                : 'index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1';
+        }
+
+        $canonicalUrl = trim($__env->yieldContent('canonical_url')) ?: url()->current();
+        $ogType = trim($__env->yieldContent('og_type')) ?: 'website';
+        $ogImage = trim($__env->yieldContent('og_image')) ?: asset('favicon.ico');
+        $twitterCard = trim($__env->yieldContent('twitter_card')) ?: 'summary';
+    @endphp
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="description" content="@yield('meta_description', 'Overlijdensberichten, familieberichten en rouwadvertenties.')">
-    <title>@yield('title', 'overlijdens-berichten.nl')</title>
+    <title>{{ $title }}</title>
+    <meta name="description" content="{{ $description }}">
+    <meta name="robots" content="{{ $robots }}">
+    <link rel="canonical" href="{{ $canonicalUrl }}">
+    <meta name="author" content="{{ $siteName }}">
+
+    <meta property="og:locale" content="nl_NL">
+    <meta property="og:site_name" content="{{ $siteName }}">
+    <meta property="og:type" content="{{ $ogType }}">
+    <meta property="og:title" content="{{ $pageTitle !== '' ? $pageTitle : $siteName }}">
+    <meta property="og:description" content="{{ $description }}">
+    <meta property="og:url" content="{{ $canonicalUrl }}">
+    <meta property="og:image" content="{{ $ogImage }}">
+
+    <meta name="twitter:card" content="{{ $twitterCard }}">
+    <meta name="twitter:title" content="{{ $pageTitle !== '' ? $pageTitle : $siteName }}">
+    <meta name="twitter:description" content="{{ $description }}">
+    <meta name="twitter:image" content="{{ $ogImage }}">
+
+    @hasSection('structured_data')
+        @yield('structured_data')
+    @endif
+    @stack('head')
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daisyui@5" type="text/css">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -27,7 +70,7 @@
         }
     </style>
 </head>
-<body class="min-h-screen bg-base-200 text-base-content">
+<body class="min-h-screen bg-base-200 text-base-content flex flex-col">
     <header class="bg-base-100 shadow-sm border-b border-base-300">
         <div class="navbar max-w-6xl w-full mx-auto px-4 min-h-16">
             <div class="navbar-start">
@@ -70,8 +113,28 @@
         </div>
     </header>
 
-    <main class="max-w-6xl mx-auto w-full px-4 py-6">
+    <main class="max-w-6xl mx-auto w-full px-4 py-6 flex-1">
         @yield('content')
     </main>
+
+    <footer class="bg-black text-white">
+        <div class="max-w-6xl mx-auto w-full px-4 py-8">
+            <h2 class="text-lg font-semibold mb-3">Steden</h2>
+            @if(!empty($footerCities))
+                <div class="flex flex-wrap gap-2">
+                    @foreach($footerCities as $city)
+                        <a
+                            href="{{ route('city.show', ['city' => $city['slug']]) }}"
+                            class="inline-flex items-center rounded-md border border-white/20 px-3 py-1.5 text-sm hover:bg-white hover:text-black transition-colors"
+                        >
+                            {{ $city['name'] }}
+                        </a>
+                    @endforeach
+                </div>
+            @else
+                <p class="text-white/70 text-sm">Nog geen steden beschikbaar.</p>
+            @endif
+        </div>
+    </footer>
 </body>
 </html>

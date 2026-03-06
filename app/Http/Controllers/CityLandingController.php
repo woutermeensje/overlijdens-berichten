@@ -11,9 +11,12 @@ class CityLandingController extends Controller
     public function city(Request $request, string $city)
     {
         $search = trim((string) $request->query('q', ''));
+        $cityName = Str::of($city)->replace('-', ' ')->title()->toString();
+        $normalizedCity = Str::of($cityName)->lower()->toString();
 
         $latestNotices = MemorialNotice::query()
             ->published()
+            ->whereRaw('LOWER(city) = ?', [$normalizedCity])
             ->when($search !== '', function ($query) use ($search): void {
                 $query->where(function ($q) use ($search): void {
                     $like = '%'.$search.'%';
@@ -29,8 +32,6 @@ class CityLandingController extends Controller
             ->latest('id')
             ->take(30)
             ->get();
-
-        $cityName = Str::of($city)->replace('-', ' ')->title()->toString();
 
         return view('city.landing', [
             'city' => $city,
@@ -44,9 +45,12 @@ class CityLandingController extends Controller
     public function crematorium(Request $request, string $city)
     {
         $search = trim((string) $request->query('q', ''));
+        $cityName = Str::of($city)->replace('-', ' ')->title()->toString();
+        $normalizedCity = Str::of($cityName)->lower()->toString();
 
         $latestNotices = MemorialNotice::query()
             ->published()
+            ->whereRaw('LOWER(city) = ?', [$normalizedCity])
             ->when($search !== '', function ($query) use ($search): void {
                 $query->where(function ($q) use ($search): void {
                     $like = '%'.$search.'%';
@@ -62,8 +66,6 @@ class CityLandingController extends Controller
             ->latest('id')
             ->take(30)
             ->get();
-
-        $cityName = Str::of($city)->replace('-', ' ')->title()->toString();
 
         return view('city.landing', [
             'city' => $city,

@@ -1,6 +1,8 @@
 @extends('layouts.public')
 
 @section('title', 'Account aanmaken (ondernemer)')
+@section('meta_description', 'Maak een account aan als uitvaartondernemer en beheer overlijdensberichten voor cliënten.')
+@section('meta_robots', 'noindex,nofollow')
 
 @section('content')
     <section class="card bg-base-100 border border-base-300 shadow-sm max-w-xl mx-auto">

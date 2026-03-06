@@ -1,10 +1,33 @@
 <!doctype html>
 <html lang="nl" data-theme="memorial">
 <head>
+    @php
+        $configuredSiteName = trim((string) config('app.name', ''));
+        $siteName = $configuredSiteName !== '' && $configuredSiteName !== 'Laravel'
+            ? $configuredSiteName
+            : 'overlijdens-berichten.nl';
+        $pageTitle = trim($__env->yieldContent('title')) ?: 'Account';
+        $title = $pageTitle.' | '.$siteName;
+        $description = trim($__env->yieldContent('meta_description')) ?: 'Beheeromgeving voor uitvaartondernemers.';
+        $canonicalUrl = trim($__env->yieldContent('canonical_url')) ?: url()->current();
+    @endphp
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Account') - overlijdens-berichten.nl</title>
+    <title>{{ $title }}</title>
+    <meta name="description" content="{{ $description }}">
+    <meta name="robots" content="noindex,nofollow,noarchive,nosnippet,noimageindex">
+    <link rel="canonical" href="{{ $canonicalUrl }}">
+    <meta property="og:locale" content="nl_NL">
+    <meta property="og:site_name" content="{{ $siteName }}">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{ $pageTitle }}">
+    <meta property="og:description" content="{{ $description }}">
+    <meta property="og:url" content="{{ $canonicalUrl }}">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="{{ $pageTitle }}">
+    <meta name="twitter:description" content="{{ $description }}">
+    @stack('head')
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daisyui@5" type="text/css">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>

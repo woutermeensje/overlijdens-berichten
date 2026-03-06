@@ -1,6 +1,7 @@
 @extends('layouts.public')
 
 @section('title', 'Overlijdensbericht plaatsen')
+@section('meta_description', 'Plaats gratis een overlijdensbericht, familiebericht of rouwadvertentie in een paar stappen.')
 
 @section('content')
     <section class="card bg-base-100 border border-base-300 shadow-sm max-w-3xl mx-auto">
