@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\AdminNewSubscriptionMail;
 use App\Mail\SubscriptionConfirmationMail;
 use App\Models\RegionSubscription;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -40,7 +41,23 @@ class RegionSubscriptionController extends Controller
 
         Mail::to($email)->send(new SubscriptionConfirmationMail($subscription));
 
-        Mail::to(config('app.admin_email'))->send(new AdminNewSubscriptionMail($subscription));
+        $adminEmails = User::query()
+            ->where('is_admin', true)
+            ->pluck('email')
+            ->filter()
+            ->map(fn (string $adminEmail): string => trim($adminEmail))
+            ->filter(fn (string $adminEmail): bool => $adminEmail !== '')
+            ->unique()
+            ->values();
+
+        $fallbackAdminEmail = config('app.admin_email');
+        if (is_string($fallbackAdminEmail) && trim($fallbackAdminEmail) !== '') {
+            $adminEmails = $adminEmails->push(trim($fallbackAdminEmail))->unique()->values();
+        }
+
+        foreach ($adminEmails as $adminEmail) {
+            Mail::to($adminEmail)->send(new AdminNewSubscriptionMail($subscription));
+        }
 
         return back()->with('newsletter_success', 'U bent aangemeld! U ontvangt wekelijks de laatste overlijdensberichten' . ($region ? ' uit ' . $region : '') . '.');
     }
