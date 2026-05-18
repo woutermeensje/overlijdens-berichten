@@ -71,6 +71,10 @@
                 </div>
                 <form method="POST" action="{{ route('newsletter.subscribe') }}" class="flex flex-col sm:flex-row gap-2">
                     @csrf
+                    <div style="display:none;position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">
+                        <label for="hp_website">Website</label>
+                        <input type="text" id="hp_website" name="website" value="" tabindex="-1" autocomplete="off">
+                    </div>
                     <input type="email" name="email" required placeholder="uw@emailadres.nl" class="input input-bordered flex-1 w-full" />
                     <input type="text" name="region" placeholder="Stad of plaats (optioneel)" class="input input-bordered flex-1 w-full" />
                     <button type="submit" class="btn btn-primary shrink-0">Aanmelden</button>

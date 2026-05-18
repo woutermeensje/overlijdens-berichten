@@ -51,6 +51,12 @@
                 <form method="post" action="{{ route('notice.wizard.submit') }}" enctype="multipart/form-data" class="space-y-6">
                     @csrf
                     <input type="hidden" name="step" value="{{ $step }}">
+                    @if ($step === 1)
+                        <div style="display:none;position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">
+                            <label for="hp_website">Website</label>
+                            <input type="text" id="hp_website" name="website" value="" tabindex="-1" autocomplete="off">
+                        </div>
+                    @endif
 
                     @if ($step === 1)
                         <div class="rounded-box border border-base-300 bg-base-100 p-4 md:p-5 space-y-4 shadow-sm">
