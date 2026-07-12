@@ -34,29 +34,22 @@ class AppServiceProvider extends ServiceProvider
             $cityMap = [];
 
             if (Schema::hasTable('content_pages')) {
-                $paths = ContentPage::query()
+                $cityPages = ContentPage::query()
                     ->where('is_active', true)
-                    ->where('path', 'like', '%/%')
-                    ->pluck('path');
+                    ->where('content_type', 'city')
+                    ->whereNotNull('path')
+                    ->where('path', '!=', '')
+                    ->where('path', 'not like', '%/%')
+                    ->get(['title', 'path']);
 
-                foreach ($paths as $path) {
-                    $segments = array_values(array_filter(explode('/', (string) $path)));
-                    if ($segments === []) {
-                        continue;
-                    }
-
-                    $slug = trim((string) $segments[0]);
-                    if ($slug === '') {
-                        continue;
-                    }
-
-                    $citySlug = Str::slug($slug);
+                foreach ($cityPages as $page) {
+                    $citySlug = Str::slug((string) $page->path);
                     if ($citySlug === '') {
                         continue;
                     }
 
                     $cityMap[$citySlug] = [
-                        'name' => Str::title(str_replace('-', ' ', $slug)),
+                        'name' => $page->title ?: Str::title(str_replace('-', ' ', $citySlug)),
                         'slug' => $citySlug,
                     ];
                 }
@@ -80,10 +73,12 @@ class AppServiceProvider extends ServiceProvider
                         continue;
                     }
 
-                    $cityMap[$citySlug] = [
-                        'name' => Str::title($cityName),
-                        'slug' => $citySlug,
-                    ];
+                    if (!isset($cityMap[$citySlug])) {
+                        $cityMap[$citySlug] = [
+                            'name' => Str::title($cityName),
+                            'slug' => $citySlug,
+                        ];
+                    }
                 }
             }
 
