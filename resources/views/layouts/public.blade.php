@@ -51,10 +51,27 @@
     @endif
     @stack('head')
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daisyui@5" type="text/css">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
     <style>
+        :root {
+            --font-heading: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        .card-title,
+        .font-heading {
+            font-family: var(--font-heading);
+            letter-spacing: 0;
+        }
+
         [data-theme="memorial"] .btn-primary {
             background-color: #5a3a3a;
             border-color: #5a3a3a;
