@@ -48,7 +48,7 @@
         </div>
     </section>
 
-    <section class="max-w-[1080px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <section class="max-w-[1080px] mx-auto grid grid-cols-1 gap-4">
         @forelse($latestNotices as $notice)
             @php
                 $displayName = trim(($notice->deceased_first_name ?? '').' '.($notice->deceased_last_name ?? ''));
@@ -86,6 +86,10 @@
                     </div>
                 </div>
             </a>
+
+            @if($loop->iteration === 4)
+                @include('partials.notice-list-ad')
+            @endif
         @empty
             <article class="card bg-base-100 border border-base-300 max-w-[1080px] mx-auto">
                 <div class="card-body">
