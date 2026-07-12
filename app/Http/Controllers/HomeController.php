@@ -29,9 +29,12 @@ class HomeController extends Controller
             ->take(30)
             ->get();
 
+        $totalNotices = MemorialNotice::query()->published()->count();
+
         return view('home', [
             'latestNotices' => $latestNotices,
             'search' => $search,
+            'totalNotices' => $totalNotices,
         ]);
     }
 

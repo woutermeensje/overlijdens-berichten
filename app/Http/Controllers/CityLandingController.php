@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ContentPage;
 use App\Models\MemorialNotice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -11,7 +12,7 @@ class CityLandingController extends Controller
     public function city(Request $request, string $city)
     {
         $search = trim((string) $request->query('q', ''));
-        $cityName = Str::of($city)->replace('-', ' ')->title()->toString();
+        $cityName = $this->resolveCityName($city);
         $normalizedCity = Str::of($cityName)->lower()->toString();
 
         $latestNotices = MemorialNotice::query()
@@ -45,7 +46,7 @@ class CityLandingController extends Controller
     public function crematorium(Request $request, string $city)
     {
         $search = trim((string) $request->query('q', ''));
-        $cityName = Str::of($city)->replace('-', ' ')->title()->toString();
+        $cityName = $this->resolveCityName($city);
         $normalizedCity = Str::of($cityName)->lower()->toString();
 
         $latestNotices = MemorialNotice::query()
@@ -74,5 +75,18 @@ class CityLandingController extends Controller
             'search' => $search,
             'mode' => 'crematorium',
         ]);
+    }
+
+    private function resolveCityName(string $city): string
+    {
+        $slug = Str::slug($city);
+
+        $page = ContentPage::query()
+            ->where('is_active', true)
+            ->where('content_type', 'city')
+            ->where('path', $slug)
+            ->first(['title']);
+
+        return $page?->title ?: Str::of($city)->replace('-', ' ')->title()->toString();
     }
 }

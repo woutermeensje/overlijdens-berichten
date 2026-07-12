@@ -22,6 +22,25 @@
     </script>
 @endsection
 
+@section('hero')
+    <section class="text-white" style="background: linear-gradient(135deg, #3d2626 0%, #5a3a3a 55%, #4a2f2f 100%);">
+        <div class="max-w-6xl mx-auto w-full px-4 py-14 md:py-20">
+            <p class="text-xs md:text-sm font-bold tracking-widest uppercase">overlijdens-berichten.nl</p>
+            <div class="h-0.5 w-10 mt-2 mb-5" style="background-color:#c9a876;"></div>
+
+            <h1 class="text-3xl md:text-5xl font-bold leading-tight max-w-3xl mb-4">
+                Overlijdensberichten en rouwadvertenties uit heel Nederland.
+            </h1>
+
+            <p class="text-white/80 text-base md:text-lg max-w-2xl">
+                Bekijk <span class="font-semibold" style="color:#c9a876;">{{ number_format($totalNotices, 0, ',', '.') }}</span> overlijdensberichten of
+                <a href="{{ route('notice.wizard') }}" class="font-semibold underline hover:no-underline" style="color:#c9a876;">plaats direct een overlijdensbericht</a>.
+                Meld u ook aan voor onze <a href="#nieuwsbrief" class="font-semibold underline hover:no-underline" style="color:#c9a876;">nieuwsbrief</a>.
+            </p>
+        </div>
+    </section>
+@endsection
+
 @section('content')
     <section class="card bg-base-100 border border-base-300 shadow-sm max-w-[1080px] mx-auto mb-4">
         <div class="card-body gap-4">
@@ -43,7 +62,7 @@
         </div>
     </section>
 
-    <section class="max-w-[1080px] mx-auto mb-4">
+    <section id="nieuwsbrief" class="max-w-[1080px] mx-auto mb-4">
         @if(session('newsletter_success'))
             <div role="alert" class="alert alert-success mb-3">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>

@@ -114,6 +114,10 @@
         </div>
     </header>
 
+    @hasSection('hero')
+        @yield('hero')
+    @endif
+
     <main class="max-w-6xl mx-auto w-full px-4 py-6 flex-1">
         @yield('content')
     </main>
