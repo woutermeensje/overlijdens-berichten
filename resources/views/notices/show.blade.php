@@ -164,8 +164,39 @@
 
                 <label class="form-control w-full mt-3">
                     <span class="label-text">Bericht</span>
-                    <textarea name="message" rows="5" required class="textarea textarea-bordered w-full">{{ old('message') }}</textarea>
+                    <div class="bg-white rounded-box border border-base-300 overflow-hidden">
+                        <div id="condolence-editor" style="min-height: 8rem;">{!! old('message') !!}</div>
+                    </div>
+                    <textarea name="message" id="condolence-input" class="hidden">{{ old('message') }}</textarea>
                 </label>
+
+                <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
+                <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+                <script>
+                    (function () {
+                        var toolbarOptions = [
+                            ['bold', 'italic', 'underline', 'strike'],
+                            [{ list: 'ordered' }, { list: 'bullet' }],
+                            ['clean'],
+                        ];
+
+                        var quill = new Quill('#condolence-editor', {
+                            theme: 'snow',
+                            modules: { toolbar: toolbarOptions },
+                            placeholder: 'Schrijf hier uw condoleance...',
+                        });
+
+                        var hiddenInput = document.getElementById('condolence-input');
+
+                        quill.on('text-change', function () {
+                            hiddenInput.value = quill.root.innerHTML;
+                        });
+
+                        hiddenInput.closest('form').addEventListener('submit', function () {
+                            hiddenInput.value = quill.root.innerHTML;
+                        });
+                    })();
+                </script>
 
                 @if($errors->condolence->any())
                     <div role="alert" class="alert alert-error mt-3">
@@ -187,7 +218,7 @@
                                 {{ $condolence->created_at?->format('d-m-Y H:i') }}
                             </time>
                         </div>
-                        <p class="whitespace-pre-line text-base-content/80">{{ $condolence->message }}</p>
+                        <div class="prose prose-sm max-w-none text-base-content/80">{!! $condolence->message !!}</div>
                     </article>
                 @empty
                     <p class="text-sm text-base-content/70">Er zijn nog geen reacties geplaatst.</p>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\MemorialNotice;
 use App\Models\User;
+use App\Support\NoticeContentSanitizer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -89,6 +90,8 @@ class PublicNoticeWizardController extends Controller
                 'excerpt' => ['nullable', 'string', 'max:600'],
                 'content' => ['required', 'string'],
             ]);
+
+            $validated['content'] = NoticeContentSanitizer::clean($validated['content']);
 
             $request->session()->put(self::SESSION_KEY, array_merge($data, $validated));
             return redirect()->route('notice.wizard', ['step' => 3]);

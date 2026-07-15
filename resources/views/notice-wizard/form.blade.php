@@ -143,9 +143,41 @@
 
                             <label class="form-control w-full">
                                 <span class="label-text font-medium text-sm">Berichttekst</span>
-                                <textarea class="textarea textarea-bordered w-full min-h-44" name="content" rows="8" required>{{ old('content', $data['content'] ?? '') }}</textarea>
+                                <div class="bg-white rounded-box border border-base-300 overflow-hidden">
+                                    <div id="content-editor" style="min-height: 11rem;">{!! old('content', $data['content'] ?? '') !!}</div>
+                                </div>
+                                <textarea name="content" id="content-input" class="hidden">{{ old('content', $data['content'] ?? '') }}</textarea>
                             </label>
                         </div>
+
+                        <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
+                        <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+                        <script>
+                            (function () {
+                                var toolbarOptions = [
+                                    ['bold', 'italic', 'underline', 'strike'],
+                                    [{ list: 'ordered' }, { list: 'bullet' }],
+                                    ['blockquote', 'link'],
+                                    ['clean'],
+                                ];
+
+                                var quill = new Quill('#content-editor', {
+                                    theme: 'snow',
+                                    modules: { toolbar: toolbarOptions },
+                                    placeholder: 'Schrijf hier de tekst van het overlijdensbericht...',
+                                });
+
+                                var hiddenInput = document.getElementById('content-input');
+
+                                quill.on('text-change', function () {
+                                    hiddenInput.value = quill.root.innerHTML;
+                                });
+
+                                hiddenInput.closest('form').addEventListener('submit', function () {
+                                    hiddenInput.value = quill.root.innerHTML;
+                                });
+                            })();
+                        </script>
                     @endif
 
                     @if ($step === 3)
@@ -191,7 +223,7 @@
                                         @endif
                                     </div>
                                 </div>
-                                <div class="prose max-w-none leading-relaxed">{!! nl2br(e($data['content'])) !!}</div>
+                                <div class="prose max-w-none leading-relaxed">{!! $data['content'] !!}</div>
                             </div>
                         </div>
                     @endif

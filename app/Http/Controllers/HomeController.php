@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\MemorialNotice;
+use App\Support\NoticeContentSanitizer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -68,7 +69,7 @@ class HomeController extends Controller
             'first_name' => ['required', 'string', 'max:120'],
             'last_name' => ['required', 'string', 'max:120'],
             'email' => ['required', 'email', 'max:190'],
-            'message' => ['required', 'string', 'min:3', 'max:2000'],
+            'message' => ['required', 'string', 'min:3', 'max:4000'],
         ], [], [
             'first_name' => 'voornaam',
             'last_name' => 'achternaam',
@@ -82,7 +83,10 @@ class HomeController extends Controller
                 ->withInput();
         }
 
-        $notice->condolences()->create($validator->validated());
+        $validated = $validator->validated();
+        $validated['message'] = NoticeContentSanitizer::clean($validated['message']);
+
+        $notice->condolences()->create($validated);
 
         return redirect(route('notice.show', $notice->slug).'#condoleances')
             ->with('condolence_success', 'Bedankt, uw bericht is geplaatst.');
