@@ -17,6 +17,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::get('/overlijdensbericht-plaatsen', [HomeController::class, 'placeNotice'])->name('notice.place');
 Route::get('/overlijdensbericht/{slug}', [HomeController::class, 'showNotice'])->name('notice.show');
+Route::post('/overlijdensbericht/{slug}/condoleances', [HomeController::class, 'storeCondolence'])->name('notice.condolences.store')->middleware(['throttle:6,1', 'honeypot']);
 Route::get('/bericht-plaatsen', [PublicNoticeWizardController::class, 'show'])->name('notice.wizard');
 Route::post('/bericht-plaatsen', [PublicNoticeWizardController::class, 'submit'])->name('notice.wizard.submit')->middleware(['throttle:10,1', 'honeypot']);
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');

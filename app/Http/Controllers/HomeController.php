@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\MemorialNotice;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -47,11 +48,43 @@ class HomeController extends Controller
     {
         $notice = MemorialNotice::query()
             ->published()
+            ->with(['condolences' => fn ($query) => $query->oldest('created_at')->oldest('id')])
             ->where('slug', $slug)
             ->firstOrFail();
 
         return view('notices.show', [
             'notice' => $notice,
         ]);
+    }
+
+    public function storeCondolence(Request $request, string $slug): RedirectResponse
+    {
+        $notice = MemorialNotice::query()
+            ->published()
+            ->where('slug', $slug)
+            ->firstOrFail();
+
+        $validator = validator($request->all(), [
+            'first_name' => ['required', 'string', 'max:120'],
+            'last_name' => ['required', 'string', 'max:120'],
+            'email' => ['required', 'email', 'max:190'],
+            'message' => ['required', 'string', 'min:3', 'max:2000'],
+        ], [], [
+            'first_name' => 'voornaam',
+            'last_name' => 'achternaam',
+            'email' => 'e-mailadres',
+            'message' => 'bericht',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect(route('notice.show', $notice->slug).'#condoleance-form')
+                ->withErrors($validator, 'condolence')
+                ->withInput();
+        }
+
+        $notice->condolences()->create($validator->validated());
+
+        return redirect(route('notice.show', $notice->slug).'#condoleances')
+            ->with('condolence_success', 'Bedankt, uw bericht is geplaatst.');
     }
 }
