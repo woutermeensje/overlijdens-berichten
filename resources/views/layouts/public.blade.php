@@ -121,45 +121,97 @@
     <header class="bg-base-100 border-b border-base-300">
         <div class="navbar max-w-6xl w-full mx-auto px-4 min-h-16">
             <div class="navbar-start">
-                <div class="dropdown lg:hidden">
-                    <label tabindex="0" class="btn btn-ghost btn-square">
-                        <i class="ph ph-list"></i>
-                    </label>
-                    <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 bg-base-100 rounded-box w-72 border border-base-300">
-                        <li><a href="{{ route('options') }}"><i class="ph ph-list-checks"></i> Opties</a></li>
-                        <li><a href="{{ route('cities.index') }}"><i class="ph ph-map-pin-area"></i> Steden</a></li>
-                        <li><a href="{{ route('notice.wizard') }}"><i class="ph ph-note-pencil"></i> Bericht plaatsen</a></li>
-                        @auth
-                            <li><a href="{{ auth()->user()->isAdmin() ? route('account.dashboard') : route('account.notices.index') }}"><i class="ph ph-house"></i> Account</a></li>
-                        @else
-                            <li><a href="{{ route('login') }}"><i class="ph ph-sign-in"></i> Inloggen</a></li>
-                        @endauth
-                    </ul>
-                </div>
-                @include('partials.logo')
+                {{-- Mobiel: lege ruimte zodat het kruis precies in het midden staat. --}}
+                <span class="w-12 lg:hidden" aria-hidden="true"></span>
+                <div class="hidden lg:block">@include('partials.logo')</div>
             </div>
-            <div class="navbar-center hidden lg:flex">
-                <ul class="menu menu-horizontal px-1 gap-1">
+            <div class="navbar-center">
+                <div class="lg:hidden">@include('partials.logo', ['iconOnly' => true, 'iconClass' => 'h-8 w-8'])</div>
+                <ul class="menu menu-horizontal px-1 gap-1 hidden lg:flex">
                     <li><a href="{{ route('options') }}"><i class="ph ph-list-checks"></i> Opties</a></li>
                     <li><a href="{{ route('cities.index') }}"><i class="ph ph-map-pin-area"></i> Steden</a></li>
                     <li><a href="{{ route('notice.wizard') }}"><i class="ph ph-note-pencil"></i> Bericht plaatsen</a></li>
                 </ul>
             </div>
             <div class="navbar-end gap-2">
-                <span class="hidden lg:block h-6 w-px bg-base-300 mx-2" aria-hidden="true"></span>
-                @auth
-                    <a href="{{ auth()->user()->isAdmin() ? route('account.dashboard') : route('account.notices.index') }}" class="btn btn-ghost text-base"><i class="ph ph-house"></i> Account</a>
-                    <form method="post" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="btn btn-outline text-base"><i class="ph ph-sign-out"></i> <span class="hidden sm:inline">Uitloggen</span></button>
-                    </form>
-                @else
-                    <a href="{{ route('login') }}" class="btn btn-ghost text-base"><i class="ph ph-sign-in"></i> <span class="hidden sm:inline">Inloggen</span></a>
-                    <a href="{{ route('notice.wizard') }}" class="btn btn-primary text-base"><i class="ph ph-note-pencil"></i> <span class="hidden sm:inline">Bericht plaatsen</span></a>
-                @endauth
+                <div class="hidden lg:flex items-center gap-2">
+                    <span class="h-6 w-px bg-base-300 mx-2" aria-hidden="true"></span>
+                    @auth
+                        <a href="{{ auth()->user()->isAdmin() ? route('account.dashboard') : route('account.notices.index') }}" class="btn btn-ghost text-base"><i class="ph ph-house"></i> Account</a>
+                        <form method="post" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="btn btn-outline text-base"><i class="ph ph-sign-out"></i> Uitloggen</button>
+                        </form>
+                    @else
+                        <a href="{{ route('login') }}" class="btn btn-ghost text-base"><i class="ph ph-sign-in"></i> Inloggen</a>
+                        <a href="{{ route('notice.wizard') }}" class="btn btn-primary text-base"><i class="ph ph-note-pencil"></i> Bericht plaatsen</a>
+                    @endauth
+                </div>
+                <button type="button" class="btn btn-ghost btn-square btn-lg lg:hidden" aria-label="Menu openen" aria-controls="mobile-menu" aria-expanded="false" data-mobile-menu-open>
+                    <i class="ph ph-list text-4xl" aria-hidden="true"></i>
+                </button>
             </div>
         </div>
     </header>
+
+    {{-- Mobiel menu: schuift van rechts naar binnen. --}}
+    <div class="lg:hidden" data-mobile-menu>
+        <div class="fixed inset-0 z-40 bg-black/40 opacity-0 pointer-events-none transition-opacity duration-300" data-mobile-menu-overlay></div>
+        <nav id="mobile-menu" aria-label="Menu" aria-hidden="true" inert
+             class="fixed inset-y-0 right-0 z-50 w-80 max-w-[85vw] bg-base-100 border-l border-base-300 flex flex-col translate-x-full transition-transform duration-300 ease-out">
+            <div class="flex items-center justify-between px-4 min-h-16 border-b border-base-300">
+                <span class="font-semibold text-lg">Menu</span>
+                <button type="button" class="btn btn-ghost btn-square btn-lg" aria-label="Menu sluiten" data-mobile-menu-close>
+                    <i class="ph ph-x text-3xl" aria-hidden="true"></i>
+                </button>
+            </div>
+            <ul class="menu menu-lg w-full p-4 gap-1 text-lg">
+                <li><a href="{{ route('home') }}"><i class="ph ph-house-simple"></i> Overlijdensberichten</a></li>
+                <li><a href="{{ route('options') }}"><i class="ph ph-list-checks"></i> Opties</a></li>
+                <li><a href="{{ route('cities.index') }}"><i class="ph ph-map-pin-area"></i> Steden</a></li>
+                @auth
+                    <li><a href="{{ auth()->user()->isAdmin() ? route('account.dashboard') : route('account.notices.index') }}"><i class="ph ph-house"></i> Account</a></li>
+                @else
+                    <li><a href="{{ route('login') }}"><i class="ph ph-sign-in"></i> Inloggen</a></li>
+                @endauth
+            </ul>
+            <div class="mt-auto p-4 space-y-2 border-t border-base-300">
+                <a href="{{ route('notice.wizard') }}" class="btn btn-primary btn-lg w-full"><i class="ph ph-note-pencil"></i> Bericht plaatsen</a>
+                @auth
+                    <form method="post" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="btn btn-outline btn-lg w-full"><i class="ph ph-sign-out"></i> Uitloggen</button>
+                    </form>
+                @endauth
+            </div>
+        </nav>
+    </div>
+    <script>
+        (() => {
+            const root = document.querySelector('[data-mobile-menu]');
+            const panel = root.querySelector('nav');
+            const overlay = root.querySelector('[data-mobile-menu-overlay]');
+            const openButton = document.querySelector('[data-mobile-menu-open]');
+
+            const setOpen = (open) => {
+                panel.classList.toggle('translate-x-full', !open);
+                overlay.classList.toggle('opacity-0', !open);
+                overlay.classList.toggle('pointer-events-none', !open);
+                panel.toggleAttribute('inert', !open);
+                panel.setAttribute('aria-hidden', String(!open));
+                openButton.setAttribute('aria-expanded', String(open));
+                document.documentElement.classList.toggle('overflow-hidden', open);
+                (open ? root.querySelector('[data-mobile-menu-close]') : openButton).focus();
+            };
+
+            openButton.addEventListener('click', () => setOpen(true));
+            overlay.addEventListener('click', () => setOpen(false));
+            root.querySelector('[data-mobile-menu-close]').addEventListener('click', () => setOpen(false));
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && openButton.getAttribute('aria-expanded') === 'true') setOpen(false);
+            });
+        })();
+    </script>
 
     @hasSection('hero')
         @yield('hero')
