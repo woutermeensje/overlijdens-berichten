@@ -42,7 +42,7 @@
     <div class="max-w-[1080px] mx-auto space-y-4">
         <div><a href="{{ route('home') }}" class="btn btn-ghost btn-sm">&larr; Terug naar overzicht</a></div>
 
-        <section class="bg-base-100 border border-base-300 rounded-lg shadow-sm p-5 md:p-6">
+        <section class="bg-base-100 border border-base-300 rounded-box shadow-sm p-5 md:p-6">
             <div class="flex flex-col md:flex-row gap-4 md:items-center">
                 <div class="avatar shrink-0">
                     <div class="w-28 rounded-full ring ring-base-300 ring-offset-base-100 ring-offset-2">
@@ -65,13 +65,13 @@
         </section>
 
         <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,65fr)_minmax(0,35fr)] gap-4 items-start">
-            <article class="bg-base-100 border border-base-300 rounded-lg shadow-sm p-5 md:p-6">
+            <article class="bg-base-100 border border-base-300 rounded-box shadow-sm p-5 md:p-6">
                 <h2 class="text-2xl font-semibold mb-4">Overlijdensbericht</h2>
                 <div class="prose max-w-none">{!! $notice->content !!}</div>
             </article>
 
             <aside class="space-y-4">
-                <section class="bg-base-100 border border-base-300 rounded-lg shadow-sm p-5">
+                <section class="bg-base-100 border border-base-300 rounded-box shadow-sm p-5">
                     <h2 class="text-xl font-semibold mb-3">Informatie over de uitvaart</h2>
 
                     @if($hasFuneralInfo)
@@ -112,7 +112,7 @@
                     @endif
                 </section>
 
-                <section class="bg-base-100 border border-base-300 rounded-lg shadow-sm p-5">
+                <section class="bg-base-100 border border-base-300 rounded-box shadow-sm p-5">
                     <h2 class="text-xl font-semibold mb-3">Condoleanceregister</h2>
 
                     @if($notice->condolence_url)
@@ -125,7 +125,7 @@
             </aside>
         </div>
 
-        <section id="condoleances" class="bg-base-100 border border-base-300 rounded-lg shadow-sm p-5 md:p-6">
+        <section id="condoleances" class="bg-base-100 border border-base-300 rounded-box shadow-sm p-5 md:p-6">
             <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-4">
                 <div>
                     <h2 class="text-2xl font-semibold">Reacties en condoleances</h2>
@@ -140,7 +140,7 @@
                 </div>
             @endif
 
-            <form id="condoleance-form" method="POST" action="{{ route('notice.condolences.store', $notice->slug) }}" class="bg-base-200/60 border border-base-300 rounded-lg p-4 mb-6">
+            <form id="condoleance-form" method="POST" action="{{ route('notice.condolences.store', $notice->slug) }}" class="bg-base-200/60 border border-base-300 rounded-box p-4 mb-6">
                 @csrf
                 <div style="display:none;position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">
                     <label for="hp_condolence_{{ $notice->id }}">Website</label>
@@ -211,7 +211,7 @@
 
             <div class="space-y-3">
                 @forelse($notice->condolences as $condolence)
-                    <article class="border border-base-300 rounded-lg p-4">
+                    <article class="border border-base-300 rounded-box p-4">
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-2">
                             <h3 class="font-semibold">{{ $condolence->first_name }} {{ $condolence->last_name }}</h3>
                             <time datetime="{{ $condolence->created_at?->toDateString() }}" class="text-sm text-base-content/60">

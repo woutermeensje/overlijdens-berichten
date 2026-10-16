@@ -28,6 +28,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="google-site-verification" content="rL2igVYswJn8aNcCv9m8jOerGBKanqMJrygtW_aPxk8" />
     <title>{{ $title }}</title>
+    <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
+    <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="32x32">
     <meta name="description" content="{{ $description }}">
     <meta name="robots" content="{{ $robots }}">
     <link rel="canonical" href="{{ $canonicalUrl }}">
@@ -70,6 +72,21 @@
         .font-heading {
             font-family: var(--font-heading);
             letter-spacing: 0;
+        }
+
+        /* Eén border-stijl voor het hele platform: 1px solid base-300, radius 5px */
+        [data-theme="memorial"] {
+            --radius-box: 5px;
+            --radius-field: 5px;
+            --radius-selector: 5px;
+            --border: 1px;
+        }
+        [data-theme="memorial"] .input,
+        [data-theme="memorial"] .select,
+        [data-theme="memorial"] .textarea,
+        [data-theme="memorial"] .file-input {
+            border: 1px solid var(--color-base-300);
+            border-radius: 5px;
         }
 
         [data-theme="memorial"] .btn-primary {
@@ -147,7 +164,7 @@
                     @foreach($footerCities as $city)
                         <a
                             href="{{ route('city.show', ['city' => $city['slug']]) }}"
-                            class="inline-flex items-center rounded-md border border-white/20 px-3 py-1.5 text-sm hover:bg-white hover:text-black transition-colors"
+                            class="inline-flex items-center rounded-box border border-white/20 px-3 py-1.5 text-sm hover:bg-white hover:text-black transition-colors"
                         >
                             {{ $city['name'] }}
                         </a>

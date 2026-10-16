@@ -15,6 +15,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title }}</title>
+    <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
+    <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="32x32">
     <meta name="description" content="{{ $description }}">
     <meta name="robots" content="noindex,nofollow,noarchive,nosnippet,noimageindex">
     <link rel="canonical" href="{{ $canonicalUrl }}">
@@ -33,6 +35,21 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
     <style>
+        /* Eén border-stijl voor het hele platform: 1px solid base-300, radius 5px */
+        [data-theme="memorial"] {
+            --radius-box: 5px;
+            --radius-field: 5px;
+            --radius-selector: 5px;
+            --border: 1px;
+        }
+        [data-theme="memorial"] .input,
+        [data-theme="memorial"] .select,
+        [data-theme="memorial"] .textarea,
+        [data-theme="memorial"] .file-input {
+            border: 1px solid var(--color-base-300);
+            border-radius: 5px;
+        }
+
         [data-theme="memorial"] .btn-primary {
             background-color: #5a3a3a;
             border-color: #5a3a3a;

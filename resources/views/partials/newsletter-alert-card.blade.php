@@ -20,7 +20,7 @@
         </div>
     @endif
 
-    <div class="card bg-base-100 border border-primary/30 shadow-sm">
+    <div class="card bg-base-100 border border-base-300 shadow-sm">
         <div class="card-body py-4 gap-3">
             <div class="flex items-start gap-3">
                 <div class="text-primary mt-0.5 shrink-0">
@@ -40,8 +40,8 @@
                     <label for="hp_website_{{ $honeypotId }}">Website</label>
                     <input type="text" id="hp_website_{{ $honeypotId }}" name="website" value="" tabindex="-1" autocomplete="off">
                 </div>
-                <input type="email" name="email" required placeholder="uw@emailadres.nl" class="input input-bordered flex-1 w-full" />
-                <input type="text" name="region" value="{{ $region }}" placeholder="{{ $regionPlaceholder }}" class="input input-bordered flex-1 w-full" />
+                <input type="email" name="email" required placeholder="uw@emailadres.nl" class="input input-bordered flex-1 w-full px-3" />
+                <input type="text" name="region" value="{{ $region }}" placeholder="{{ $regionPlaceholder }}" class="input input-bordered flex-1 w-full px-3" />
                 <button type="submit" class="btn btn-primary shrink-0">Alerts instellen</button>
             </form>
         </div>
