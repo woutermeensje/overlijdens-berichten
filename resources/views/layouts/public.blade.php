@@ -148,14 +148,14 @@
             <div class="navbar-end gap-2">
                 <span class="hidden lg:block h-6 w-px bg-base-300 mx-2" aria-hidden="true"></span>
                 @auth
-                    <a href="{{ auth()->user()->isAdmin() ? route('account.dashboard') : route('account.notices.index') }}" class="btn btn-ghost btn-sm"><i class="ph ph-house"></i> Account</a>
+                    <a href="{{ auth()->user()->isAdmin() ? route('account.dashboard') : route('account.notices.index') }}" class="btn btn-ghost text-base"><i class="ph ph-house"></i> Account</a>
                     <form method="post" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" class="btn btn-outline btn-sm"><i class="ph ph-sign-out"></i> <span class="hidden sm:inline">Uitloggen</span></button>
+                        <button type="submit" class="btn btn-outline text-base"><i class="ph ph-sign-out"></i> <span class="hidden sm:inline">Uitloggen</span></button>
                     </form>
                 @else
-                    <a href="{{ route('login') }}" class="btn btn-ghost btn-sm"><i class="ph ph-sign-in"></i> <span class="hidden sm:inline">Inloggen</span></a>
-                    <a href="{{ route('notice.wizard') }}" class="btn btn-primary btn-sm"><i class="ph ph-note-pencil"></i> <span class="hidden sm:inline">Bericht plaatsen</span></a>
+                    <a href="{{ route('login') }}" class="btn btn-ghost text-base"><i class="ph ph-sign-in"></i> <span class="hidden sm:inline">Inloggen</span></a>
+                    <a href="{{ route('notice.wizard') }}" class="btn btn-primary text-base"><i class="ph ph-note-pencil"></i> <span class="hidden sm:inline">Bericht plaatsen</span></a>
                 @endauth
             </div>
         </div>
