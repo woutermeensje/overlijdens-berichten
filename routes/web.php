@@ -11,6 +11,7 @@ use App\Http\Controllers\PageController;
 use App\Http\Controllers\PublicNoticeWizardController;
 use App\Http\Controllers\RegionSubscriptionController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\SubscriptionOverviewController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -34,6 +35,7 @@ Route::middleware('guest')->group(function (): void {
 Route::middleware('auth')->group(function (): void {
     Route::middleware('admin')->group(function (): void {
         Route::get('/account', [DashboardController::class, 'index'])->name('account.dashboard');
+        Route::get('/account/meldingen', [SubscriptionOverviewController::class, 'index'])->name('account.subscriptions');
         Route::resource('/account/berichten', AccountNoticeController::class)
             ->only(['create', 'store'])
             ->names('account.notices');

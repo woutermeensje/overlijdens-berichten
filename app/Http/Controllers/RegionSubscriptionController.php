@@ -52,6 +52,7 @@ class RegionSubscriptionController extends Controller
 
         $email = $request->input('email');
         $region = null;
+        $province = null;
 
         if (trim((string) $request->input('region')) !== '') {
             try {
@@ -67,6 +68,7 @@ class RegionSubscriptionController extends Controller
             }
 
             $region = $place['name'];
+            $province = $place['province'] ?? null;
         }
 
         $exists = RegionSubscription::where('email', $email)
@@ -80,6 +82,7 @@ class RegionSubscriptionController extends Controller
         $subscription = RegionSubscription::create([
             'email' => $email,
             'region' => $region,
+            'province' => $province,
             'token' => Str::random(40),
         ]);
 

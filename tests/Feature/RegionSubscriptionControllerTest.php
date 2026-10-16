@@ -34,6 +34,7 @@ class RegionSubscriptionControllerTest extends TestCase
                     'id' => self::AMSTERDAM_ID,
                     'type' => 'woonplaats',
                     'woonplaatsnaam' => 'Amsterdam',
+                    'provincienaam' => 'Noord-Holland',
                 ]]]]);
             }
 
@@ -67,7 +68,7 @@ class RegionSubscriptionControllerTest extends TestCase
 
         $response->assertRedirect();
         $response->assertSessionHas('newsletter_success');
-        $this->assertDatabaseHas('region_subscriptions', ['email' => 'subscriber@example.com', 'region' => 'Amsterdam']);
+        $this->assertDatabaseHas('region_subscriptions', ['email' => 'subscriber@example.com', 'region' => 'Amsterdam', 'province' => 'Noord-Holland']);
 
         Mail::assertSent(SubscriptionConfirmationMail::class, fn (SubscriptionConfirmationMail $mail): bool => $mail->hasTo('subscriber@example.com'));
         Mail::assertSent(AdminNewSubscriptionMail::class, fn (AdminNewSubscriptionMail $mail): bool => $mail->hasTo('admin@example.com'));

@@ -88,7 +88,7 @@ class Geocoder
     /**
      * Zoekt de PDOK-woonplaats bij een plaatsnaam, zodat een formulier die vooraf kan selecteren.
      *
-     * @return array{id: string, name: string}|null
+     * @return array{id: string, name: string, province: string|null}|null
      */
     public function findPlace(string $name): ?array
     {
@@ -97,13 +97,13 @@ class Geocoder
             return null;
         }
 
-        $result = Cache::remember('geocoder:place:'.md5(Str::lower($name)), now()->addDays(30), function () use ($name) {
+        $result = Cache::remember('geocoder:place:v2:'.md5(Str::lower($name)), now()->addDays(30), function () use ($name) {
             try {
                 $response = Http::timeout(5)->get(self::ENDPOINT, [
                     'q' => $name,
                     'fq' => 'type:woonplaats',
                     'rows' => 1,
-                    'fl' => 'id,woonplaatsnaam',
+                    'fl' => 'id,woonplaatsnaam,provincienaam',
                 ]);
             } catch (Throwable $e) {
                 Log::warning('Geocoding mislukt', ['query' => $name, 'error' => $e->getMessage()]);
@@ -114,7 +114,7 @@ class Geocoder
             $doc = $response->successful() ? $response->json('response.docs.0') : null;
 
             return ['match' => is_array($doc) && isset($doc['id'], $doc['woonplaatsnaam'])
-                ? ['id' => (string) $doc['id'], 'name' => (string) $doc['woonplaatsnaam']]
+                ? ['id' => (string) $doc['id'], 'name' => (string) $doc['woonplaatsnaam'], 'province' => $doc['provincienaam'] ?? null]
                 : null];
         });
 
