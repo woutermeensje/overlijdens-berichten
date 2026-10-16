@@ -1,4 +1,4 @@
-<article class="card border shadow-sm" style="background:#5a3a3a;color:#ffffff;border-color:#5a3a3a;">
+<article class="card border" style="background:#5a3a3a;color:#ffffff;border-color:#5a3a3a;">
     <div class="card-body flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div class="max-w-2xl">
             <p class="text-xs font-bold uppercase tracking-widest text-white/70">Overlijdens-berichten.nl</p>

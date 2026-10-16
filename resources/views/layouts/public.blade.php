@@ -13,7 +13,7 @@
         $robots = trim($__env->yieldContent('meta_robots'));
 
         if ($robots === '') {
-            $robots = request()->has('q')
+            $robots = request()->hasAny(['q', 'type', 'locatie'])
                 ? 'noindex,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1'
                 : 'index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1';
         }
@@ -55,23 +55,28 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daisyui@5" type="text/css">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
     <style>
         :root {
-            --font-heading: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+            --font-sans: "Work Sans", sans-serif;
         }
 
-        h1,
-        h2,
-        h3,
-        h4,
-        .card-title,
-        .font-heading {
-            font-family: var(--font-heading);
-            letter-spacing: 0;
+        html,
+        body {
+            font-family: var(--font-sans);
+        }
+
+        /* Geen box-shadows op het platform, ook niet vanuit daisyUI-componenten */
+        [data-theme="memorial"] {
+            --depth: 0;
+        }
+        *,
+        *::before,
+        *::after {
+            box-shadow: none !important;
         }
 
         /* Eén border-stijl voor het hele platform: 1px solid base-300, radius 5px */
@@ -106,14 +111,14 @@
     </style>
 </head>
 <body class="min-h-screen bg-base-200 text-base-content flex flex-col">
-    <header class="bg-base-100 shadow-sm border-b border-base-300">
+    <header class="bg-base-100 border-b border-base-300">
         <div class="navbar max-w-6xl w-full mx-auto px-4 min-h-16">
             <div class="navbar-start">
                 <div class="dropdown lg:hidden">
                     <label tabindex="0" class="btn btn-ghost btn-square">
                         <i class="ph ph-list"></i>
                     </label>
-                    <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-72 border border-base-300">
+                    <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 bg-base-100 rounded-box w-72 border border-base-300">
                         <li><a href="{{ route('blog.index') }}"><i class="ph ph-newspaper"></i> Blog</a></li>
                         <li><a href="{{ route('cities.index') }}"><i class="ph ph-map-pin-area"></i> Steden</a></li>
                         <li><a href="{{ route('notice.wizard') }}"><i class="ph ph-note-pencil"></i> Bericht plaatsen</a></li>

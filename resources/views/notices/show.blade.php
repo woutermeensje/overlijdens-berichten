@@ -29,7 +29,7 @@
 @section('content')
     @php
         $displayName = $seoDisplayName;
-        $fallbackAvatar = 'https://ui-avatars.com/api/?name='.urlencode($displayName).'&background=e2e7ec&color=6b7580&size=256';
+        $fallbackAvatar = asset('images/candle-placeholder.svg');
         $hasFuneralInfo = collect([
             $notice->funeral_company_name,
             $notice->funeral_company_contact,
@@ -42,14 +42,14 @@
     <div class="max-w-[1080px] mx-auto space-y-4">
         <div><a href="{{ route('home') }}" class="btn btn-ghost btn-sm">&larr; Terug naar overzicht</a></div>
 
-        <section class="bg-base-100 border border-base-300 rounded-box shadow-sm p-5 md:p-6">
+        <section class="bg-base-100 border border-base-300 rounded-box p-5 md:p-6">
             <div class="flex flex-col md:flex-row gap-4 md:items-center">
                 <div class="avatar shrink-0">
-                    <div class="w-28 rounded-full ring ring-base-300 ring-offset-base-100 ring-offset-2">
+                    <div class="w-28 rounded-full border border-base-300">
                         @if($notice->photo_url)
                             <img src="{{ $notice->photo_url }}" alt="Foto van {{ $displayName }}" onerror="this.onerror=null;this.src='{{ $fallbackAvatar }}';" />
                         @else
-                            <img src="{{ $fallbackAvatar }}" alt="Avatar van {{ $displayName }}" />
+                            <img src="{{ $fallbackAvatar }}" alt="Kaarsje ter nagedachtenis aan {{ $displayName }}" />
                         @endif
                     </div>
                 </div>
@@ -65,13 +65,13 @@
         </section>
 
         <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,65fr)_minmax(0,35fr)] gap-4 items-start">
-            <article class="bg-base-100 border border-base-300 rounded-box shadow-sm p-5 md:p-6">
+            <article class="bg-base-100 border border-base-300 rounded-box p-5 md:p-6">
                 <h2 class="text-2xl font-semibold mb-4">Overlijdensbericht</h2>
                 <div class="prose max-w-none">{!! $notice->content !!}</div>
             </article>
 
             <aside class="space-y-4">
-                <section class="bg-base-100 border border-base-300 rounded-box shadow-sm p-5">
+                <section class="bg-base-100 border border-base-300 rounded-box p-5">
                     <h2 class="text-xl font-semibold mb-3">Informatie over de uitvaart</h2>
 
                     @if($hasFuneralInfo)
@@ -112,7 +112,7 @@
                     @endif
                 </section>
 
-                <section class="bg-base-100 border border-base-300 rounded-box shadow-sm p-5">
+                <section class="bg-base-100 border border-base-300 rounded-box p-5">
                     <h2 class="text-xl font-semibold mb-3">Condoleanceregister</h2>
 
                     @if($notice->condolence_url)
@@ -125,7 +125,7 @@
             </aside>
         </div>
 
-        <section id="condoleances" class="bg-base-100 border border-base-300 rounded-box shadow-sm p-5 md:p-6">
+        <section id="condoleances" class="bg-base-100 border border-base-300 rounded-box p-5 md:p-6">
             <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-4">
                 <div>
                     <h2 class="text-2xl font-semibold">Reacties en condoleances</h2>

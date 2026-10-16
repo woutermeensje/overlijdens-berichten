@@ -20,7 +20,7 @@
         </div>
     @endif
 
-    <div class="card bg-base-100 border border-base-300 shadow-sm">
+    <div class="card bg-base-100 border border-base-300">
         <div class="card-body py-4 gap-3">
             <div class="flex items-start gap-3">
                 <div class="text-primary mt-0.5 shrink-0">

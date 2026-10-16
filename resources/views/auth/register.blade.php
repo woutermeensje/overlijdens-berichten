@@ -5,7 +5,7 @@
 @section('meta_robots', 'noindex,nofollow')
 
 @section('content')
-    <section class="card bg-base-100 border border-base-300 shadow-sm max-w-xl mx-auto">
+    <section class="card bg-base-100 border border-base-300 max-w-xl mx-auto">
         <div class="card-body">
             <h1 class="card-title text-2xl">Account aanmaken voor uitvaartondernemers</h1>
 

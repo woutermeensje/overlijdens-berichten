@@ -31,10 +31,32 @@
     <meta name="twitter:description" content="{{ $description }}">
     @stack('head')
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daisyui@5" type="text/css">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
     <style>
+        :root {
+            --font-sans: "Work Sans", sans-serif;
+        }
+
+        html,
+        body {
+            font-family: var(--font-sans);
+        }
+
+        /* Geen box-shadows op het platform, ook niet vanuit daisyUI-componenten */
+        [data-theme="memorial"] {
+            --depth: 0;
+        }
+        *,
+        *::before,
+        *::after {
+            box-shadow: none !important;
+        }
+
         /* Eén border-stijl voor het hele platform: 1px solid base-300, radius 5px */
         [data-theme="memorial"] {
             --radius-box: 5px;
@@ -71,7 +93,7 @@
         <input id="account-drawer" type="checkbox" class="drawer-toggle" />
 
         <div class="drawer-content">
-            <div class="navbar bg-base-100 shadow-sm lg:hidden">
+            <div class="navbar bg-base-100 lg:hidden">
                 <div class="flex-none">
                     <label for="account-drawer" class="btn btn-square btn-ghost">
                         <i class="ph ph-list"></i>
@@ -87,7 +109,7 @@
                     <div class="alert alert-success mb-4"><span>{{ session('status') }}</span></div>
                 @endif
 
-                <div class="card bg-base-100 shadow-sm border border-base-300">
+                <div class="card bg-base-100 border border-base-300">
                     <div class="card-body">
                         @yield('content')
                     </div>

@@ -14,7 +14,7 @@
 @endpush
 
 @section('content')
-    <section class="card bg-base-100 border border-base-300 shadow-sm mb-4">
+    <section class="card bg-base-100 border border-base-300 mb-4">
         <div class="card-body">
             <h1 class="card-title text-2xl">Blog</h1>
             <p class="text-base-content/70">Informatieve berichten over overlijden, uitvaart en praktische zaken.</p>
@@ -23,7 +23,7 @@
 
     <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         @forelse($posts as $post)
-            <article class="card bg-base-100 border border-base-300 shadow-sm">
+            <article class="card bg-base-100 border border-base-300">
                 <div class="card-body">
                     <h2 class="card-title text-lg leading-tight">{{ $post->title }}</h2>
                     <p class="text-base-content/70">{{ \Illuminate\Support\Str::limit(strip_tags($post->meta_description ?: $post->content_html), 150) }}</p>

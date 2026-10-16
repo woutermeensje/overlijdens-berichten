@@ -28,56 +28,49 @@
         'region' => null,
     ])
 
-    <div class="max-w-[1080px] mx-auto flex flex-col lg:flex-row lg:items-start gap-4">
+    <div class="max-w-[1080px] mx-auto mt-14 flex flex-col lg:flex-row lg:items-start gap-4">
         <aside class="w-full lg:flex-1 lg:min-w-0 lg:sticky lg:top-4">
-            <section class="card bg-base-100 border border-base-300 shadow-sm">
+            <section class="card bg-base-100 border border-base-300">
                 <div class="card-body gap-4">
                     <div>
-                        <h2 class="card-title text-xl">Zoeken</h2>
-                        <p class="text-sm text-base-content/70">Zoek op naam, voornaam of locatie.</p>
+                        <h1 class="card-title text-2xl">Laatste overlijdensberichten</h1>
+                        <p class="text-sm text-base-content/70">Zoek op naam, type bericht of in de buurt van een plaats.</p>
                     </div>
 
-                    <form method="get" action="{{ route('home') }}" class="flex flex-col gap-2">
-                        <input type="search" name="q" value="{{ $search }}" placeholder="Naam, voornaam of locatie" class="input w-full" />
-                        <div class="flex gap-2">
-                            <button type="submit" class="btn btn-primary flex-1">Zoeken</button>
-                            @if($search !== '')
-                                <a href="{{ route('home') }}" class="btn">Reset</a>
-                            @endif
-                        </div>
-                    </form>
+                    @include('partials.notice-filters', [
+                        'action' => route('home'),
+                        'filters' => $filters,
+                    ])
                 </div>
             </section>
         </aside>
 
         <div class="w-full lg:w-[65%] lg:shrink-0 min-w-0 flex flex-col gap-4">
-            <div class="flex flex-wrap justify-between items-end gap-3">
-                <h1 class="card-title text-2xl">Laatste overlijdensberichten</h1>
-                <a href="{{ route('notice.wizard') }}" class="btn btn-primary">Bericht plaatsen</a>
-            </div>
-
             @forelse($latestNotices as $notice)
                 @php
                     $displayName = trim(($notice->deceased_first_name ?? '').' '.($notice->deceased_last_name ?? ''));
                     if ($displayName === '') {
                         $displayName = $notice->title;
                     }
-                    $fallbackAvatar = 'https://ui-avatars.com/api/?name='.urlencode($displayName).'&background=e2e7ec&color=6b7580&size=256';
+                    $fallbackAvatar = asset('images/candle-placeholder.svg');
                 @endphp
 
-                <a href="{{ route('notice.show', $notice->slug) }}" class="card bg-base-100 border border-base-300 shadow-sm hover:shadow-md transition-shadow">
+                <a href="{{ route('notice.show', $notice->slug) }}" class="card bg-base-100 border border-base-300 hover:bg-base-200/50 transition-colors">
                     <div class="card-body p-4 gap-3">
                         <div class="text-right text-sm italic text-base-content/70">
                             {{ $notice->city ?: ($notice->province ?: 'Onbekende locatie') }}
+                            @isset($notice->distance_km)
+                                <span class="not-italic">· {{ number_format($notice->distance_km, 0, ',', '.') }} km</span>
+                            @endisset
                         </div>
 
                         <div class="flex items-center gap-3">
                             <div class="avatar">
-                                <div class="w-20 rounded-full ring ring-base-300 ring-offset-base-100 ring-offset-2">
+                                <div class="w-20 rounded-full border border-base-300">
                                     @if($notice->photo_url)
                                         <img src="{{ $notice->photo_url }}" alt="Foto van {{ $displayName }}" onerror="this.onerror=null;this.src='{{ $fallbackAvatar }}';" />
                                     @else
-                                        <img src="{{ $fallbackAvatar }}" alt="Avatar van {{ $displayName }}" />
+                                        <img src="{{ $fallbackAvatar }}" alt="Kaarsje ter nagedachtenis aan {{ $displayName }}" />
                                     @endif
                                 </div>
                             </div>
@@ -100,8 +93,8 @@
             @empty
                 <article class="card bg-base-100 border border-base-300">
                     <div class="card-body">
-                        @if($search !== '')
-                            Geen berichten gevonden voor "{{ $search }}".
+                        @if($filters->isActive())
+                            Geen berichten gevonden die aan uw zoekopdracht voldoen.
                         @else
                             Er zijn nog geen berichten gepubliceerd.
                         @endif
