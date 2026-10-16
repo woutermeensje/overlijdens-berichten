@@ -11,6 +11,8 @@ class NoticeContentSanitizer
     {
         $config = (new HtmlSanitizerConfig())
             ->allowElement('p')
+            ->allowElement('h2')
+            ->allowElement('h3')
             ->allowElement('br')
             ->allowElement('strong')
             ->allowElement('b')

@@ -79,6 +79,7 @@ class NoticeSearch
                 });
             })
             ->when($this->type !== '', fn (Builder $query) => $query->where('type', $this->type))
+            ->orderByDesc('is_featured')
             ->latest('published_at')
             ->latest('id');
 

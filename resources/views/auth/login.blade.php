@@ -1,14 +1,13 @@
 @extends('layouts.public')
 
-@section('title', 'Inloggen voor uitvaartondernemers')
-@section('meta_description', 'Inloggen voor uitvaartondernemers om overlijdensberichten en rouwadvertenties te beheren.')
+@section('title', 'Inloggen beheer')
+@section('meta_description', 'Inloggen in de beheeromgeving.')
 @section('meta_robots', 'noindex,nofollow')
 
 @section('content')
     <section class="card bg-base-100 border border-base-300 max-w-xl mx-auto">
         <div class="card-body">
-            <h1 class="card-title text-2xl">Inloggen voor uitvaartondernemers</h1>
-            <p class="text-base-content/70">Deze omgeving is bedoeld voor ondernemers die namens clienten berichten plaatsen.</p>
+            <h1 class="card-title text-2xl">Inloggen beheer</h1>
 
             <form method="post" action="{{ route('login.attempt') }}" class="space-y-4">
                 @csrf

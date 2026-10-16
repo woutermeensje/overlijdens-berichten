@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\MemorialNotice;
+use App\Support\NoticeContentSanitizer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -13,11 +14,7 @@ class AccountNoticeController extends Controller
 {
     public function index(): View
     {
-        $user = auth()->user();
-
-        $notices = $user->isAdmin()
-            ? MemorialNotice::query()->latest('created_at')->get()
-            : $user->memorialNotices()->latest('created_at')->get();
+        $notices = MemorialNotice::query()->latest('created_at')->get();
 
         return view('account.notices.index', [
             'notices' => $notices,
@@ -45,15 +42,11 @@ class AccountNoticeController extends Controller
 
     public function show(MemorialNotice $notice): RedirectResponse
     {
-        $this->ensureOwner($notice);
-
         return redirect()->route('account.notices.edit', $notice);
     }
 
     public function edit(MemorialNotice $notice): View
     {
-        $this->ensureOwner($notice);
-
         return view('account.notices.edit', [
             'notice' => $notice,
         ]);
@@ -61,8 +54,6 @@ class AccountNoticeController extends Controller
 
     public function update(Request $request, MemorialNotice $notice): RedirectResponse
     {
-        $this->ensureOwner($notice);
-
         $data = $this->validateNotice($request);
 
         if ($notice->title !== $data['title']) {
@@ -78,7 +69,6 @@ class AccountNoticeController extends Controller
 
     public function destroy(MemorialNotice $notice): RedirectResponse
     {
-        $this->ensureOwner($notice);
         $notice->delete();
 
         return redirect()
@@ -88,16 +78,9 @@ class AccountNoticeController extends Controller
 
     private function validateNotice(Request $request): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'title' => ['required', 'string', 'max:190'],
-            'type' => [
-                'required',
-                Rule::in([
-                    MemorialNotice::TYPE_OVERLIJDENSBERICHT,
-                    MemorialNotice::TYPE_FAMILIEBERICHT,
-                    MemorialNotice::TYPE_ROUWADVERTENTIE,
-                ]),
-            ],
+            'type' => ['required', Rule::in(array_keys(MemorialNotice::typeLabels()))],
             'deceased_first_name' => ['nullable', 'string', 'max:120'],
             'deceased_last_name' => ['nullable', 'string', 'max:120'],
             'excerpt' => ['nullable', 'string', 'max:600'],
@@ -117,6 +100,10 @@ class AccountNoticeController extends Controller
             'next_of_kin_email' => ['nullable', 'email', 'max:190'],
             'condolence_url' => ['nullable', 'url', 'max:255'],
         ]);
+
+        $data['content'] = NoticeContentSanitizer::clean($data['content']);
+
+        return $data;
     }
 
     private function uniqueSlug(string $title, ?int $ignoreId = null): string
@@ -136,16 +123,5 @@ class AccountNoticeController extends Controller
         }
 
         return $slug;
-    }
-
-    private function ensureOwner(MemorialNotice $notice): void
-    {
-        $user = auth()->user();
-
-        if ($user->isAdmin()) {
-            return;
-        }
-
-        abort_unless($notice->user_id === $user->id, 403);
     }
 }

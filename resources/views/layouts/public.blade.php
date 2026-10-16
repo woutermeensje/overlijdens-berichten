@@ -124,12 +124,10 @@
                         <li><a href="{{ route('notice.wizard') }}"><i class="ph ph-note-pencil"></i> Bericht plaatsen</a></li>
                         @auth
                             <li><a href="{{ route('account.dashboard') }}"><i class="ph ph-house"></i> Account</a></li>
-                        @else
-                            <li><a href="{{ route('login') }}"><i class="ph ph-sign-in"></i> Inloggen (uitvaartondernemer)</a></li>
                         @endauth
                     </ul>
                 </div>
-                <a href="{{ route('home') }}" class="btn btn-ghost text-lg">overlijdens-berichten.nl</a>
+                @include('partials.logo')
             </div>
             <div class="navbar-center hidden lg:flex">
                 <ul class="menu menu-horizontal px-1 gap-1">
@@ -146,7 +144,6 @@
                         <button type="submit" class="btn btn-outline btn-sm"><i class="ph ph-sign-out"></i> <span class="hidden sm:inline">Uitloggen</span></button>
                     </form>
                 @else
-                    <a href="{{ route('login') }}" class="btn btn-ghost btn-sm hidden sm:inline-flex"><i class="ph ph-sign-in"></i> Inloggen ondernemer</a>
                     <a href="{{ route('notice.wizard') }}" class="btn btn-primary btn-sm"><i class="ph ph-note-pencil"></i> <span class="hidden sm:inline">Bericht plaatsen</span></a>
                 @endauth
             </div>

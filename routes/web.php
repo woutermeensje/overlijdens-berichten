@@ -29,16 +29,15 @@ Route::get('/nieuwsbrief/afmelden/{token}', [RegionSubscriptionController::class
 Route::middleware('guest')->group(function (): void {
     Route::get('/inloggen', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/inloggen', [AuthController::class, 'login'])->name('login.attempt');
-
-    Route::get('/account-aanmaken', [AuthController::class, 'showRegister'])->name('register');
-    Route::post('/account-aanmaken', [AuthController::class, 'register'])->name('register.store');
 });
 
 Route::middleware('auth')->group(function (): void {
-    Route::get('/account', [DashboardController::class, 'index'])->name('account.dashboard');
-    Route::resource('/account/berichten', AccountNoticeController::class)
-        ->parameters(['berichten' => 'notice'])
-        ->names('account.notices');
+    Route::middleware('admin')->group(function (): void {
+        Route::get('/account', [DashboardController::class, 'index'])->name('account.dashboard');
+        Route::resource('/account/berichten', AccountNoticeController::class)
+            ->parameters(['berichten' => 'notice'])
+            ->names('account.notices');
+    });
 
     Route::post('/uitloggen', [AuthController::class, 'logout'])->name('logout');
 });

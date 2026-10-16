@@ -6,23 +6,67 @@ use App\Mail\AdminNewSubscriptionMail;
 use App\Mail\SubscriptionConfirmationMail;
 use App\Models\RegionSubscription;
 use App\Models\User;
+use App\Services\Geocoder;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Throwable;
 
 class RegionSubscriptionController extends Controller
 {
-    public function store(Request $request)
+    /** Mensen hebben minimaal zoveel seconden nodig om het formulier in te vullen; bots niet. */
+    private const MIN_FILL_SECONDS = 3;
+
+    private const MAX_FORM_AGE_SECONDS = 6 * 60 * 60;
+
+    /** Tijdstempel voor het formulier, zodat direct geposte of razendsnelle inzendingen herkend worden. */
+    public static function formToken(): string
     {
+        return Crypt::encryptString((string) now()->timestamp);
+    }
+
+    public function store(Request $request, Geocoder $geocoder)
+    {
+        try {
+            $age = now()->timestamp - (int) Crypt::decryptString((string) $request->input('form_token'));
+        } catch (DecryptException) {
+            return back();
+        }
+
+        if ($age < self::MIN_FILL_SECONDS) {
+            return back();
+        }
+
+        if ($age > self::MAX_FORM_AGE_SECONDS) {
+            return back()->withInput()->with('newsletter_error', 'Het formulier is verlopen. Probeer het opnieuw.');
+        }
+
         $request->validate([
             'email' => ['required', 'email', 'max:255'],
             'region' => ['nullable', 'string', 'max:255'],
+            'region_id' => ['nullable', 'string', 'max:64'],
         ]);
 
         $email = $request->input('email');
-        $region = $request->input('region') ? trim($request->input('region')) : null;
-        if ($region === '') {
-            $region = null;
+        $region = null;
+
+        if (trim((string) $request->input('region')) !== '') {
+            try {
+                $place = $geocoder->placeById((string) $request->input('region_id'));
+            } catch (Throwable $e) {
+                Log::warning('Plaats controleren mislukt', ['region_id' => $request->input('region_id'), 'error' => $e->getMessage()]);
+
+                return back()->withInput()->with('newsletter_error', 'We konden de plaats nu niet controleren. Probeer het later opnieuw.');
+            }
+
+            if ($place === null) {
+                return back()->withInput()->with('newsletter_error', 'Kies een plaats uit de lijst met suggesties.');
+            }
+
+            $region = $place['name'];
         }
 
         $exists = RegionSubscription::where('email', $email)
@@ -41,19 +85,7 @@ class RegionSubscriptionController extends Controller
 
         Mail::to($email)->send(new SubscriptionConfirmationMail($subscription));
 
-        $adminEmails = User::query()
-            ->where('is_admin', true)
-            ->pluck('email')
-            ->filter()
-            ->map(fn (string $adminEmail): string => trim($adminEmail))
-            ->filter(fn (string $adminEmail): bool => $adminEmail !== '')
-            ->unique()
-            ->values();
-
-        $fallbackAdminEmail = config('app.admin_email');
-        if (is_string($fallbackAdminEmail) && trim($fallbackAdminEmail) !== '') {
-            $adminEmails = $adminEmails->push(trim($fallbackAdminEmail))->unique()->values();
-        }
+        $adminEmails = User::adminEmails();
 
         foreach ($adminEmails as $adminEmail) {
             Mail::to($adminEmail)->send(new AdminNewSubscriptionMail($subscription));

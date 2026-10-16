@@ -12,7 +12,7 @@
         <label class="form-control w-full">
             <span class="label-text">Type bericht</span>
             <select name="type" required class="select select-bordered w-full">
-                @foreach (['overlijdensbericht' => 'Overlijdensbericht', 'familiebericht' => 'Familiebericht', 'rouwadvertentie' => 'Rouwadvertentie'] as $value => $label)
+                @foreach (\App\Models\MemorialNotice::typeLabels() as $value => $label)
                     <option value="{{ $value }}" @selected(old('type', $notice->type ?? '') === $value)>{{ $label }}</option>
                 @endforeach
             </select>
@@ -40,10 +40,11 @@
         <textarea name="excerpt" rows="3" class="textarea textarea-bordered w-full">{{ old('excerpt', $notice->excerpt ?? '') }}</textarea>
     </label>
 
-    <label class="form-control w-full">
-        <span class="label-text">Berichttekst</span>
-        <textarea name="content" rows="9" required class="textarea textarea-bordered w-full">{{ old('content', $notice->content ?? '') }}</textarea>
-    </label>
+    <div class="form-control w-full">
+        <label for="notice-content" class="label-text">Berichttekst</label>
+        <textarea name="content" id="notice-content" rows="9" required data-rich-text data-editor-height="320" placeholder="Schrijf hier de tekst van het overlijdensbericht..." class="textarea textarea-bordered w-full">{{ old('content', $notice->content ?? '') }}</textarea>
+        @include('partials.rich-text-editor')
+    </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <label class="form-control w-full"><span class="label-text">Provincie</span><input name="province" value="{{ old('province', $notice->province ?? '') }}" class="input input-bordered w-full"></label>

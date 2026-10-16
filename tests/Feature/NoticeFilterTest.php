@@ -54,6 +54,19 @@ class NoticeFilterTest extends TestCase
             ->assertDontSee('Anna Overlijden');
     }
 
+    public function test_featured_notices_are_listed_first(): void
+    {
+        $this->createNotice('Oud Uitgelicht', 'Delft')->forceFill([
+            'is_featured' => true,
+            'published_at' => now()->subWeek(),
+        ])->save();
+        $this->createNotice('Nieuw Gewoon', 'Delft');
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSeeInOrder(['Oud Uitgelicht', 'Nieuw Gewoon']);
+    }
+
     public function test_notices_can_be_filtered_by_radius_around_a_place(): void
     {
         $this->createNotice('Dirk Delft', 'Delft');

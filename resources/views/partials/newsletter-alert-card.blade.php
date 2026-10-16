@@ -1,10 +1,18 @@
 @php
     $region = $region ?? null;
-    $title = $title ?? 'Ontvang wekelijkse alerts';
     $description = $description ?? 'Meld u aan en ontvang elke week een overzicht van nieuwe berichten in uw mailbox.';
     $regionPlaceholder = $regionPlaceholder ?? 'Stad of plaats (optioneel)';
     $honeypotId = \Illuminate\Support\Str::slug($region ?: 'landelijk');
+    $prefilledPlace = $region ? app(\App\Services\Geocoder::class)->findPlace($region) : null;
+    $regionValue = old('region', $prefilledPlace ? $region : '');
+    $regionIdValue = old('region_id', $prefilledPlace['id'] ?? '');
 @endphp
+
+<p class="max-w-[1080px] mx-auto mb-6 h-6 flex items-center gap-2 text-sm text-base-content/70 min-w-0">
+    <span class="font-semibold text-base-content shrink-0">Overlijdens-berichten.nl</span>
+    <span aria-hidden="true" class="shrink-0">|</span>
+    <span class="truncate">Alle overlijdensberichten, familieberichten en rouwadvertenties uit Nederland op één plek.</span>
+</p>
 
 <section id="nieuwsbrief" class="max-w-[1080px] mx-auto mb-4">
     @if(session('newsletter_success'))
@@ -28,22 +36,137 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                     </svg>
                 </div>
-                <div class="flex-1 min-w-0">
-                    <p class="font-semibold text-base">{{ $title }}</p>
-                    <p class="text-sm text-base-content/70">{{ $description }}</p>
-                </div>
+                <p class="flex-1 min-w-0 font-semibold text-base">{{ $description }}</p>
             </div>
 
-            <form method="POST" action="{{ route('newsletter.subscribe') }}" class="flex flex-col sm:flex-row gap-2">
+            <form method="POST" action="{{ route('newsletter.subscribe') }}" class="flex flex-col sm:flex-row sm:items-start gap-2" data-place-form>
                 @csrf
+                <input type="hidden" name="form_token" value="{{ \App\Http\Controllers\RegionSubscriptionController::formToken() }}">
                 <div style="display:none;position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">
                     <label for="hp_website_{{ $honeypotId }}">Website</label>
                     <input type="text" id="hp_website_{{ $honeypotId }}" name="website" value="" tabindex="-1" autocomplete="off">
                 </div>
-                <input type="email" name="email" required placeholder="uw@emailadres.nl" class="input input-bordered flex-1 w-full px-3" />
-                <input type="text" name="region" value="{{ $region }}" placeholder="{{ $regionPlaceholder }}" class="input input-bordered flex-1 w-full px-3" />
+                <input type="email" name="email" value="{{ old('email') }}" required placeholder="uw@emailadres.nl" class="input input-bordered w-full sm:flex-1 px-3" />
+                <div class="relative w-full sm:flex-1" data-place-picker>
+                    <input type="text" name="region" value="{{ $regionValue }}" placeholder="{{ $regionPlaceholder }}" class="input input-bordered w-full px-3"
+                           autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="place_list_{{ $honeypotId }}" data-place-input />
+                    <input type="hidden" name="region_id" value="{{ $regionIdValue }}" data-place-id>
+                    <ul id="place_list_{{ $honeypotId }}" role="listbox" class="hidden absolute z-30 left-0 right-0 mt-1 menu menu-sm bg-base-100 border border-base-300 rounded-box shadow-lg max-h-72 overflow-y-auto flex-nowrap" data-place-list></ul>
+                    <p class="hidden text-error text-xs mt-1 px-1" data-place-error>Kies een plaats uit de lijst met suggesties.</p>
+                </div>
                 <button type="submit" class="btn btn-primary shrink-0">Alerts instellen</button>
             </form>
         </div>
     </div>
 </section>
+
+@once
+    <script>
+        (() => {
+            const SUGGEST_URL = 'https://api.pdok.nl/bzk/locatieserver/search/v3_1/suggest';
+
+            const escapeHtml = (value) => value.replace(/[&<>"']/g, (c) => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+
+            document.querySelectorAll('[data-place-form]').forEach((form) => {
+                const picker = form.querySelector('[data-place-picker]');
+                const input = picker.querySelector('[data-place-input]');
+                const hiddenId = picker.querySelector('[data-place-id]');
+                const list = picker.querySelector('[data-place-list]');
+                const error = picker.querySelector('[data-place-error]');
+                let places = [];
+                let active = -1;
+                let timer = null;
+                let controller = null;
+                let confirmedLabel = hiddenId.value ? input.value : null;
+
+                const close = () => {
+                    list.classList.add('hidden');
+                    input.setAttribute('aria-expanded', 'false');
+                    active = -1;
+                };
+
+                const render = () => {
+                    if (places.length === 0) {
+                        list.innerHTML = '<li class="menu-disabled"><span>Geen plaats gevonden</span></li>';
+                    } else {
+                        list.innerHTML = places.map((place, i) =>
+                            `<li role="option" aria-selected="${i === active}"><a class="${i === active ? 'menu-active' : ''}" data-index="${i}">${escapeHtml(place.weergavenaam)}</a></li>`
+                        ).join('');
+                    }
+                    list.classList.remove('hidden');
+                    input.setAttribute('aria-expanded', 'true');
+                };
+
+                const choose = (place) => {
+                    input.value = place.woonplaatsnaam;
+                    hiddenId.value = place.id;
+                    confirmedLabel = input.value;
+                    error.classList.add('hidden');
+                    input.classList.remove('input-error');
+                    close();
+                };
+
+                const search = async (query) => {
+                    controller?.abort();
+                    controller = new AbortController();
+                    const params = new URLSearchParams({q: query, fq: 'type:woonplaats', rows: '8', fl: 'id,weergavenaam,woonplaatsnaam'});
+                    try {
+                        const response = await fetch(`${SUGGEST_URL}?${params}`, {signal: controller.signal});
+                        const data = await response.json();
+                        places = data.response?.docs ?? [];
+                        active = places.length ? 0 : -1;
+                        render();
+                    } catch (e) {
+                        if (e.name !== 'AbortError') close();
+                    }
+                };
+
+                input.addEventListener('input', () => {
+                    if (input.value !== confirmedLabel) {
+                        hiddenId.value = '';
+                    }
+                    clearTimeout(timer);
+                    const query = input.value.trim();
+                    if (query.length < 2) {
+                        close();
+                        return;
+                    }
+                    timer = setTimeout(() => search(query), 200);
+                });
+
+                input.addEventListener('keydown', (event) => {
+                    if (list.classList.contains('hidden') || places.length === 0) return;
+                    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                        event.preventDefault();
+                        active = (active + (event.key === 'ArrowDown' ? 1 : -1) + places.length) % places.length;
+                        render();
+                    } else if (event.key === 'Enter' && active >= 0) {
+                        event.preventDefault();
+                        choose(places[active]);
+                    } else if (event.key === 'Escape') {
+                        close();
+                    }
+                });
+
+                // mousedown in plaats van click, zodat de keuze vóór de blur van het invoerveld valt.
+                list.addEventListener('mousedown', (event) => {
+                    const item = event.target.closest('[data-index]');
+                    if (!item) return;
+                    event.preventDefault();
+                    choose(places[Number(item.dataset.index)]);
+                });
+
+                input.addEventListener('blur', close);
+
+                form.addEventListener('submit', (event) => {
+                    if (input.value.trim() !== '' && hiddenId.value === '') {
+                        event.preventDefault();
+                        error.classList.remove('hidden');
+                        input.classList.add('input-error');
+                        input.focus();
+                    }
+                });
+            });
+        })();
+    </script>
+@endonce

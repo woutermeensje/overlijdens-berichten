@@ -7,7 +7,6 @@
 
 @section('content')
     @include('partials.newsletter-alert-card', [
-        'title' => 'Ontvang wekelijkse alerts voor '.$cityName,
         'region' => $cityName,
         'regionPlaceholder' => 'Stad of plaats',
     ])

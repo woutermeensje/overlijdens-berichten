@@ -22,7 +22,7 @@
                 @forelse($notices as $notice)
                     <tr>
                         <td>{{ $notice->title }}</td>
-                        <td><span class="badge">{{ ucfirst($notice->type) }}</span></td>
+                        <td><span class="badge">{{ \App\Models\MemorialNotice::typeLabels()[$notice->type] ?? ucfirst($notice->type) }}</span></td>
                         <td>{{ $notice->created_at->format('d-m-Y H:i') }}</td>
                         <td>
                             <div class="flex justify-end gap-2">

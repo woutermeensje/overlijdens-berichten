@@ -14,6 +14,7 @@ use Throwable;
 class Geocoder
 {
     private const ENDPOINT = 'https://api.pdok.nl/bzk/locatieserver/search/v3_1/free';
+    private const LOOKUP_ENDPOINT = 'https://api.pdok.nl/bzk/locatieserver/search/v3_1/lookup';
 
     public const TYPES_PLACE = ['woonplaats'];
     public const TYPES_SEARCH = ['woonplaats', 'postcode', 'gemeente'];
@@ -82,6 +83,69 @@ class Geocoder
             'lng' => (float) $m[1],
             'label' => $label,
         ];
+    }
+
+    /**
+     * Zoekt de PDOK-woonplaats bij een plaatsnaam, zodat een formulier die vooraf kan selecteren.
+     *
+     * @return array{id: string, name: string}|null
+     */
+    public function findPlace(string $name): ?array
+    {
+        $name = trim($name);
+        if ($name === '') {
+            return null;
+        }
+
+        $result = Cache::remember('geocoder:place:'.md5(Str::lower($name)), now()->addDays(30), function () use ($name) {
+            try {
+                $response = Http::timeout(5)->get(self::ENDPOINT, [
+                    'q' => $name,
+                    'fq' => 'type:woonplaats',
+                    'rows' => 1,
+                    'fl' => 'id,woonplaatsnaam',
+                ]);
+            } catch (Throwable $e) {
+                Log::warning('Geocoding mislukt', ['query' => $name, 'error' => $e->getMessage()]);
+
+                return ['match' => null];
+            }
+
+            $doc = $response->successful() ? $response->json('response.docs.0') : null;
+
+            return ['match' => is_array($doc) && isset($doc['id'], $doc['woonplaatsnaam'])
+                ? ['id' => (string) $doc['id'], 'name' => (string) $doc['woonplaatsnaam']]
+                : null];
+        });
+
+        return $result['match'];
+    }
+
+    /**
+     * Haalt een woonplaats op via het PDOK-id dat de gebruiker in de suggestielijst koos.
+     *
+     * @return array{id: string, name: string}|null  null als het id geen bestaande woonplaats is
+     *
+     * @throws \Illuminate\Http\Client\ConnectionException|\Illuminate\Http\Client\RequestException als PDOK niet bereikbaar is
+     */
+    public function placeById(string $id): ?array
+    {
+        if (! preg_match('/^wpl-[a-f0-9]{32}$/', $id)) {
+            return null;
+        }
+
+        $result = Cache::remember('geocoder:place-id:'.$id, now()->addDays(30), function () use ($id) {
+            $doc = Http::timeout(5)
+                ->get(self::LOOKUP_ENDPOINT, ['id' => $id, 'fl' => 'id,type,woonplaatsnaam'])
+                ->throw()
+                ->json('response.docs.0');
+
+            return ['match' => is_array($doc) && ($doc['type'] ?? null) === 'woonplaats' && isset($doc['woonplaatsnaam'])
+                ? ['id' => $id, 'name' => (string) $doc['woonplaatsnaam']]
+                : null];
+        });
+
+        return $result['match'];
     }
 
     public static function distanceKm(float $lat1, float $lng1, float $lat2, float $lng2): float

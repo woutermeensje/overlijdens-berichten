@@ -15,6 +15,11 @@ class MemorialNotice extends Model
     public const TYPE_OVERLIJDENSBERICHT = 'overlijdensbericht';
     public const TYPE_FAMILIEBERICHT = 'familiebericht';
     public const TYPE_ROUWADVERTENTIE = 'rouwadvertentie';
+    public const TYPE_IN_MEMORIAM = 'in_memoriam';
+
+    // Betaalde optie in de wizard: een overlijdensbericht dat bovenaan de lijsten staat.
+    public const FEATURED_OPTION = 'uitgelicht';
+    public const FEATURED_PRICE_EXCL_VAT = 175.00;
 
     protected $fillable = [
         'user_id',
@@ -42,6 +47,8 @@ class MemorialNotice extends Model
         'next_of_kin_email',
         'condolence_url',
         'status',
+        'is_featured',
+        'billing_details',
         'published_at',
     ];
 
@@ -49,6 +56,8 @@ class MemorialNotice extends Model
         'born_date' => 'date',
         'died_date' => 'date',
         'published_at' => 'datetime',
+        'is_featured' => 'boolean',
+        'billing_details' => 'array',
         'latitude' => 'float',
         'longitude' => 'float',
     ];
@@ -76,6 +85,7 @@ class MemorialNotice extends Model
             self::TYPE_OVERLIJDENSBERICHT => 'Overlijdensbericht',
             self::TYPE_FAMILIEBERICHT => 'Familiebericht',
             self::TYPE_ROUWADVERTENTIE => 'Rouwadvertentie',
+            self::TYPE_IN_MEMORIAM => 'In memoriam',
         ];
     }
 

@@ -18,7 +18,6 @@
                     <ul class="list-disc list-inside text-base-content/80 space-y-1">
                         <li>Publiceer overlijdensbericht, familiebericht of rouwadvertentie via één eenvoudig formulier</li>
                         <li>Geen account nodig voor particulieren</li>
-                        <li>Uitvaartondernemers kunnen inloggen voor beheer van clientberichten</li>
                     </ul>
                     <div>
                         <a href="{{ route('notice.wizard') }}" class="btn btn-primary">Start met plaatsen</a>

@@ -24,7 +24,6 @@
 
 @section('content')
     @include('partials.newsletter-alert-card', [
-        'title' => 'Ontvang wekelijkse alerts',
         'region' => null,
     ])
 

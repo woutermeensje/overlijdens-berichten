@@ -67,7 +67,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,65fr)_minmax(0,35fr)] gap-4 items-start">
             <article class="bg-base-100 border border-base-300 rounded-box p-5 md:p-6">
                 <h2 class="text-2xl font-semibold mb-4">Overlijdensbericht</h2>
-                <div class="prose max-w-none">{!! $notice->content !!}</div>
+                <div class="prose max-w-none [overflow-wrap:anywhere]">{!! $notice->content !!}</div>
             </article>
 
             <aside class="space-y-4">
@@ -162,41 +162,11 @@
                     </label>
                 </div>
 
-                <label class="form-control w-full mt-3">
-                    <span class="label-text">Bericht</span>
-                    <div class="bg-white rounded-box border border-base-300 overflow-hidden">
-                        <div id="condolence-editor" style="min-height: 8rem;">{!! old('message') !!}</div>
-                    </div>
-                    <textarea name="message" id="condolence-input" class="hidden">{{ old('message') }}</textarea>
-                </label>
-
-                <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
-                <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
-                <script>
-                    (function () {
-                        var toolbarOptions = [
-                            ['bold', 'italic', 'underline', 'strike'],
-                            [{ list: 'ordered' }, { list: 'bullet' }],
-                            ['clean'],
-                        ];
-
-                        var quill = new Quill('#condolence-editor', {
-                            theme: 'snow',
-                            modules: { toolbar: toolbarOptions },
-                            placeholder: 'Schrijf hier uw condoleance...',
-                        });
-
-                        var hiddenInput = document.getElementById('condolence-input');
-
-                        quill.on('text-change', function () {
-                            hiddenInput.value = quill.root.innerHTML;
-                        });
-
-                        hiddenInput.closest('form').addEventListener('submit', function () {
-                            hiddenInput.value = quill.root.innerHTML;
-                        });
-                    })();
-                </script>
+                <div class="form-control w-full mt-3">
+                    <label for="condolence-input" class="label-text">Bericht</label>
+                    <textarea name="message" id="condolence-input" data-rich-text="basic" data-editor-height="140" required placeholder="Schrijf hier uw condoleance..." class="textarea textarea-bordered w-full" rows="5">{{ old('message') }}</textarea>
+                    @include('partials.rich-text-editor')
+                </div>
 
                 @if($errors->condolence->any())
                     <div role="alert" class="alert alert-error mt-3">

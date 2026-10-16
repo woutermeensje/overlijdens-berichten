@@ -37,6 +37,23 @@ class User extends Authenticatable
         return (bool) $this->is_admin;
     }
 
+    /**
+     * E-mailadressen van alle admins, aangevuld met config('app.admin_email').
+     *
+     * @return \Illuminate\Support\Collection<int, string>
+     */
+    public static function adminEmails(): \Illuminate\Support\Collection
+    {
+        $emails = static::query()
+            ->where('is_admin', true)
+            ->pluck('email')
+            ->push(config('app.admin_email'))
+            ->filter(fn ($email): bool => is_string($email) && trim($email) !== '')
+            ->map(fn (string $email): string => trim($email));
+
+        return $emails->unique()->values();
+    }
+
     public function memorialNotices(): HasMany
     {
         return $this->hasMany(MemorialNotice::class);
