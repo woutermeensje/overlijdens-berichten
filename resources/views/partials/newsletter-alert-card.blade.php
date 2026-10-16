@@ -2,17 +2,19 @@
     $region = $region ?? null;
     $description = $description ?? 'Meld u aan en ontvang elke week een overzicht van nieuwe berichten in uw mailbox.';
     $regionPlaceholder = $regionPlaceholder ?? 'Stad of plaats (optioneel)';
+    // Alleen als hoofdkop gebruiken op pagina's die zelf geen h1 hebben.
+    $brandHeading = ($brandAsHeading ?? false) ? 'h1' : 'span';
     $honeypotId = \Illuminate\Support\Str::slug($region ?: 'landelijk');
     $prefilledPlace = $region ? app(\App\Services\Geocoder::class)->findPlace($region) : null;
     $regionValue = old('region', $prefilledPlace ? $region : '');
     $regionIdValue = old('region_id', $prefilledPlace['id'] ?? '');
 @endphp
 
-<p class="max-w-[1080px] mx-auto mb-6 h-6 flex items-center gap-2 text-sm text-base-content/70 min-w-0">
-    <span class="font-semibold text-base-content shrink-0">Overlijdens-berichten.nl</span>
+<div class="max-w-[1080px] mx-auto mb-6 h-6 flex items-center gap-2 text-sm text-base-content/70 min-w-0">
+    <{{ $brandHeading }} class="font-semibold text-base-content shrink-0">Overlijdens-berichten.nl</{{ $brandHeading }}>
     <span aria-hidden="true" class="shrink-0">|</span>
-    <span class="truncate">Alle overlijdensberichten, familieberichten en rouwadvertenties uit Nederland op één plek.</span>
-</p>
+    <p class="truncate">Alle overlijdensberichten, familieberichten en rouwadvertenties uit Nederland op één plek.</p>
+</div>
 
 <section id="nieuwsbrief" class="max-w-[1080px] mx-auto mb-4">
     @if(session('newsletter_success'))
@@ -60,113 +62,4 @@
     </div>
 </section>
 
-@once
-    <script>
-        (() => {
-            const SUGGEST_URL = 'https://api.pdok.nl/bzk/locatieserver/search/v3_1/suggest';
-
-            const escapeHtml = (value) => value.replace(/[&<>"']/g, (c) => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
-
-            document.querySelectorAll('[data-place-form]').forEach((form) => {
-                const picker = form.querySelector('[data-place-picker]');
-                const input = picker.querySelector('[data-place-input]');
-                const hiddenId = picker.querySelector('[data-place-id]');
-                const list = picker.querySelector('[data-place-list]');
-                const error = picker.querySelector('[data-place-error]');
-                let places = [];
-                let active = -1;
-                let timer = null;
-                let controller = null;
-                let confirmedLabel = hiddenId.value ? input.value : null;
-
-                const close = () => {
-                    list.classList.add('hidden');
-                    input.setAttribute('aria-expanded', 'false');
-                    active = -1;
-                };
-
-                const render = () => {
-                    if (places.length === 0) {
-                        list.innerHTML = '<li class="menu-disabled"><span>Geen plaats gevonden</span></li>';
-                    } else {
-                        list.innerHTML = places.map((place, i) =>
-                            `<li role="option" aria-selected="${i === active}"><a class="${i === active ? 'menu-active' : ''}" data-index="${i}">${escapeHtml(place.weergavenaam)}</a></li>`
-                        ).join('');
-                    }
-                    list.classList.remove('hidden');
-                    input.setAttribute('aria-expanded', 'true');
-                };
-
-                const choose = (place) => {
-                    input.value = place.woonplaatsnaam;
-                    hiddenId.value = place.id;
-                    confirmedLabel = input.value;
-                    error.classList.add('hidden');
-                    input.classList.remove('input-error');
-                    close();
-                };
-
-                const search = async (query) => {
-                    controller?.abort();
-                    controller = new AbortController();
-                    const params = new URLSearchParams({q: query, fq: 'type:woonplaats', rows: '8', fl: 'id,weergavenaam,woonplaatsnaam'});
-                    try {
-                        const response = await fetch(`${SUGGEST_URL}?${params}`, {signal: controller.signal});
-                        const data = await response.json();
-                        places = data.response?.docs ?? [];
-                        active = places.length ? 0 : -1;
-                        render();
-                    } catch (e) {
-                        if (e.name !== 'AbortError') close();
-                    }
-                };
-
-                input.addEventListener('input', () => {
-                    if (input.value !== confirmedLabel) {
-                        hiddenId.value = '';
-                    }
-                    clearTimeout(timer);
-                    const query = input.value.trim();
-                    if (query.length < 2) {
-                        close();
-                        return;
-                    }
-                    timer = setTimeout(() => search(query), 200);
-                });
-
-                input.addEventListener('keydown', (event) => {
-                    if (list.classList.contains('hidden') || places.length === 0) return;
-                    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-                        event.preventDefault();
-                        active = (active + (event.key === 'ArrowDown' ? 1 : -1) + places.length) % places.length;
-                        render();
-                    } else if (event.key === 'Enter' && active >= 0) {
-                        event.preventDefault();
-                        choose(places[active]);
-                    } else if (event.key === 'Escape') {
-                        close();
-                    }
-                });
-
-                // mousedown in plaats van click, zodat de keuze vóór de blur van het invoerveld valt.
-                list.addEventListener('mousedown', (event) => {
-                    const item = event.target.closest('[data-index]');
-                    if (!item) return;
-                    event.preventDefault();
-                    choose(places[Number(item.dataset.index)]);
-                });
-
-                input.addEventListener('blur', close);
-
-                form.addEventListener('submit', (event) => {
-                    if (input.value.trim() !== '' && hiddenId.value === '') {
-                        event.preventDefault();
-                        error.classList.remove('hidden');
-                        input.classList.add('input-error');
-                        input.focus();
-                    }
-                });
-            });
-        })();
-    </script>
-@endonce
+@include('partials.place-picker-script')

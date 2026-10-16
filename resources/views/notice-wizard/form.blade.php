@@ -5,7 +5,7 @@
 @section('meta_robots', 'noindex,follow')
 
 @section('content')
-    <section class="max-w-4xl mx-auto space-y-6">
+    <section class="max-w-6xl mx-auto space-y-6 pb-24 lg:pb-0">
         <header class="flex flex-wrap items-start justify-between gap-3">
             <div class="space-y-2">
                 <h1 class="text-2xl sm:text-3xl font-semibold leading-tight">Bericht plaatsen</h1>
@@ -14,6 +14,7 @@
             <span class="badge badge-outline">Gratis pakket</span>
         </header>
 
+        <div class="lg:grid lg:grid-cols-[minmax(0,1fr)_17rem] lg:gap-8 lg:items-start">
         <div class="space-y-6">
             @if($errors->any())
                 <div class="alert alert-error">
@@ -25,14 +26,14 @@
                 </div>
             @endif
 
-            <form method="post" action="{{ route('notice.wizard.submit') }}" enctype="multipart/form-data" class="space-y-6">
+            <form id="notice-form" method="post" action="{{ route('notice.wizard.submit') }}" enctype="multipart/form-data" class="space-y-6">
                 @csrf
                 <div style="display:none;position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">
                     <label for="hp_website">Website</label>
                     <input type="text" id="hp_website" name="website" value="" tabindex="-1" autocomplete="off">
                 </div>
 
-                <fieldset class="rounded-box border border-base-300 bg-base-100 p-4 md:p-5 space-y-4">
+                <fieldset id="sectie-type" data-progress-section="Type bericht" class="rounded-box border border-base-300 bg-base-100 p-4 md:p-5 space-y-4 scroll-mt-6">
                     <legend class="sr-only">Type bericht</legend>
                     <div class="space-y-1">
                         <h2 class="text-lg font-semibold">Type bericht</h2>
@@ -55,7 +56,7 @@
                         }
                     @endphp
                     <div id="type-select" class="relative">
-                        <input type="hidden" name="type" id="type-input" value="{{ $selectedType }}">
+                        <input type="hidden" name="type" data-progress-field id="type-input" value="{{ $selectedType }}">
                         <button type="button" id="type-select-button" class="w-full flex items-center justify-between gap-3 rounded-box border border-base-300 bg-base-100 px-4 py-3 text-left cursor-pointer hover:bg-base-200/50 focus:outline-none focus-visible:border-primary aria-expanded:border-primary" aria-haspopup="listbox" aria-expanded="false" aria-controls="type-select-list">
                             <span id="type-select-current" class="flex-1 min-w-0">
                                 @foreach ($typeOptions as $value => $option)
@@ -94,7 +95,7 @@
                     </div>
                 </fieldset>
 
-                <fieldset id="billing-details" class="rounded-box border border-base-300 bg-base-100 p-4 md:p-5 space-y-4" @if(old('type') !== \App\Models\MemorialNotice::FEATURED_OPTION) hidden disabled @endif>
+                <fieldset id="billing-details" data-progress-section="Factuurgegevens" class="scroll-mt-6 rounded-box border border-base-300 bg-base-100 p-4 md:p-5 space-y-4" @if(old('type') !== \App\Models\MemorialNotice::FEATURED_OPTION) hidden disabled @endif>
                     <legend class="sr-only">Factuurgegevens</legend>
                     <div class="space-y-1">
                         <h2 class="text-lg font-semibold">Factuurgegevens</h2>
@@ -103,7 +104,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <label class="form-control w-full">
                             <span class="label-text font-medium text-sm">Naam</span>
-                            <input class="input input-bordered w-full" name="billing_name" value="{{ old('billing_name') }}" autocomplete="name" required>
+                            <input class="input input-bordered w-full" name="billing_name" data-progress-field value="{{ old('billing_name') }}" autocomplete="name" required>
                         </label>
                         <label class="form-control w-full">
                             <span class="label-text font-medium text-sm">Bedrijfsnaam (optioneel)</span>
@@ -112,64 +113,76 @@
                     </div>
                     <label class="form-control w-full">
                         <span class="label-text font-medium text-sm">E-mailadres</span>
-                        <input type="email" class="input input-bordered w-full" name="billing_email" value="{{ old('billing_email') }}" autocomplete="email" required>
+                        <input type="email" class="input input-bordered w-full" name="billing_email" data-progress-field value="{{ old('billing_email') }}" autocomplete="email" required>
                     </label>
                     <label class="form-control w-full">
                         <span class="label-text font-medium text-sm">Straat en huisnummer</span>
-                        <input class="input input-bordered w-full" name="billing_address" value="{{ old('billing_address') }}" autocomplete="street-address" required>
+                        <input class="input input-bordered w-full" name="billing_address" data-progress-field value="{{ old('billing_address') }}" autocomplete="street-address" required>
                     </label>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <label class="form-control w-full">
                             <span class="label-text font-medium text-sm">Postcode</span>
-                            <input class="input input-bordered w-full" name="billing_postcode" value="{{ old('billing_postcode') }}" autocomplete="postal-code" required>
+                            <input class="input input-bordered w-full" name="billing_postcode" data-progress-field value="{{ old('billing_postcode') }}" autocomplete="postal-code" required>
                         </label>
                         <label class="form-control w-full">
                             <span class="label-text font-medium text-sm">Plaats</span>
-                            <input class="input input-bordered w-full" name="billing_city" value="{{ old('billing_city') }}" autocomplete="address-level2" required>
+                            <input class="input input-bordered w-full" name="billing_city" data-progress-field value="{{ old('billing_city') }}" autocomplete="address-level2" required>
                         </label>
                     </div>
                 </fieldset>
 
-                <div class="rounded-box border border-base-300 bg-base-100 p-4 md:p-5 space-y-4">
+                <div id="sectie-overledene" data-progress-section="Gegevens van de overledene" class="rounded-box border border-base-300 bg-base-100 p-4 md:p-5 space-y-4 scroll-mt-6">
                     <div class="space-y-1">
                         <h2 class="text-lg font-semibold">Gegevens van de overledene</h2>
                         <p class="text-sm text-base-content/70">Vul hier de gegevens in van degene die is overleden, niet uw eigen gegevens.</p>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <label class="form-control w-full">
-                            <span class="label-text font-medium text-sm">Voornaam</span>
-                            <input class="input input-bordered w-full" name="deceased_first_name" value="{{ old('deceased_first_name') }}" required>
-                        </label>
-                        <label class="form-control w-full">
-                            <span class="label-text font-medium text-sm">Achternaam</span>
-                            <input class="input input-bordered w-full" name="deceased_last_name" value="{{ old('deceased_last_name') }}">
-                        </label>
+                    {{-- Naam van de overledene, niet van de invuller: wachtwoordmanagers/autofill uitschakelen. --}}
+                    <label class="form-control w-full">
+                        <span class="label-text font-medium text-sm">Volledige naam</span>
+                        <input class="input input-bordered w-full" name="deceased_name" data-progress-field value="{{ old('deceased_name') }}"
+                               placeholder="Bijvoorbeeld Johanna Maria van der Berg" autocomplete="off" data-1p-ignore data-lpignore="true" required>
+                    </label>
+
+                    <div class="form-control w-full">
+                        <label for="content-input" class="label-text font-medium text-sm">Berichttekst</label>
+                        <textarea name="content" data-progress-field id="content-input" data-rich-text data-editor-height="260" placeholder="Schrijf hier de tekst van het overlijdensbericht..." class="textarea textarea-bordered w-full" rows="9">{{ old('content') }}</textarea>
+                        @include('partials.rich-text-editor')
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <label class="form-control w-full">
                             <span class="label-text font-medium text-sm">Geboortedatum</span>
-                            <input type="date" class="input input-bordered w-full" name="born_date" value="{{ old('born_date') }}">
+                            <input type="date" class="input input-bordered w-full" name="born_date" data-progress-field value="{{ old('born_date') }}">
                         </label>
                         <label class="form-control w-full">
                             <span class="label-text font-medium text-sm">Overlijdensdatum</span>
-                            <input type="date" class="input input-bordered w-full" name="died_date" value="{{ old('died_date') }}" required>
+                            <input type="date" class="input input-bordered w-full" name="died_date" data-progress-field value="{{ old('died_date') }}" required>
                         </label>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <label class="form-control w-full">
-                            <span class="label-text font-medium text-sm">Stad</span>
-                            <input class="input input-bordered w-full" name="city" value="{{ old('city') }}">
-                        </label>
-                        <label class="form-control w-full">
-                            <span class="label-text font-medium text-sm">Provincie</span>
-                            <input class="input input-bordered w-full" name="province" value="{{ old('province') }}">
-                        </label>
+                    @php
+                        $oldPlace = null;
+                        if (old('place_id')) {
+                            try {
+                                $oldPlace = app(\App\Services\Geocoder::class)->placeById((string) old('place_id'));
+                            } catch (\Throwable) {
+                                $oldPlace = null;
+                            }
+                        }
+                    @endphp
+                    <div class="form-control w-full relative" data-place-picker>
+                        <label for="place-input" class="label-text font-medium text-sm">Woonplaats</label>
+                        <input type="text" id="place-input" name="city" data-progress-field value="{{ $oldPlace['name'] ?? old('city') }}"
+                               placeholder="Begin te typen, bijvoorbeeld Den Haag" class="input input-bordered w-full"
+                               autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="place-list" data-place-input>
+                        <input type="hidden" name="place_id" value="{{ $oldPlace ? old('place_id') : '' }}" data-place-id>
+                        <ul id="place-list" role="listbox" class="hidden absolute top-full z-30 left-0 right-0 mt-1 menu menu-sm bg-base-100 border border-base-300 rounded-box max-h-72 overflow-y-auto flex-nowrap" data-place-list></ul>
+                        <p class="text-xs text-base-content/60 {{ $oldPlace ? '' : 'hidden' }}" data-place-details>{{ $oldPlace ? ($oldPlace['province'] ?? '').' · Nederland' : '' }}</p>
+                        <p class="hidden text-error text-xs" data-place-error>Kies een plaats uit de lijst met suggesties.</p>
                     </div>
                 </div>
 
-                <div class="rounded-box border border-base-300 bg-base-100 p-4 md:p-5 space-y-4">
+                <div id="sectie-foto" data-progress-section="Foto" data-progress-optional class="rounded-box border border-base-300 bg-base-100 p-4 md:p-5 space-y-4 scroll-mt-6">
                     <div class="space-y-1">
                         <h2 class="text-lg font-semibold">Foto van de overledene</h2>
                         <p class="text-sm text-base-content/70">Optioneel. Zonder foto tonen we een kaarsje.</p>
@@ -188,44 +201,38 @@
                             <span class="block text-sm text-base-content/60">JPG, PNG of WEBP, maximaal 5 MB</span>
                         </span>
                         <button type="button" id="photo-remove" class="btn btn-sm btn-ghost" hidden>Verwijderen</button>
-                        <input type="file" id="photo-input" name="photo" accept="image/jpeg,image/png,image/webp" class="sr-only">
+                        <input type="file" id="photo-input" name="photo" data-progress-field accept="image/jpeg,image/png,image/webp" class="sr-only">
                     </label>
                 </div>
 
-                <div class="rounded-box border border-base-300 bg-base-100 p-4 md:p-5 space-y-4">
-                    <h2 class="text-lg font-semibold">Inhoud</h2>
-                    <label class="form-control w-full">
-                        <span class="label-text font-medium text-sm">Titel (optioneel)</span>
-                        <input class="input input-bordered w-full" name="title" value="{{ old('title') }}" placeholder="Laat leeg voor automatische naam">
-                    </label>
-
-                    <div class="form-control w-full">
-                        <label for="content-input" class="label-text font-medium text-sm">Berichttekst</label>
-                        <textarea name="content" id="content-input" data-rich-text data-editor-height="260" placeholder="Schrijf hier de tekst van het overlijdensbericht..." class="textarea textarea-bordered w-full" rows="9">{{ old('content') }}</textarea>
-                        @include('partials.rich-text-editor')
-                    </div>
-                </div>
-
-                <fieldset class="rounded-box border border-base-300 bg-base-100 p-4 md:p-5 space-y-4">
+                <fieldset id="sectie-contact" data-progress-section="Uw contactgegevens" class="rounded-box border border-base-300 bg-base-100 p-4 md:p-5 space-y-4 scroll-mt-6">
                     <legend class="sr-only">Uw contactgegevens</legend>
                     <div class="space-y-1">
                         <h2 class="text-lg font-semibold">Uw contactgegevens</h2>
                         <p class="text-sm text-base-content/70">Zodat we contact met u kunnen opnemen over dit bericht. Deze gegevens worden niet getoond op de website.</p>
                     </div>
+                    @php
+                        // Bij een ingelogde gebruiker de accountnaam opsplitsen: eerste woord als voornaam, de rest als achternaam.
+                        $accountName = explode(' ', trim((string) auth()->user()?->name), 2);
+                    @endphp
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <label class="form-control w-full">
-                            <span class="label-text font-medium text-sm">Uw naam</span>
-                            <input class="input input-bordered w-full" name="placer_name" value="{{ old('placer_name', auth()->user()?->name) }}" autocomplete="name" required>
+                            <span class="label-text font-medium text-sm">Uw voornaam</span>
+                            <input class="input input-bordered w-full" name="placer_first_name" data-progress-field value="{{ old('placer_first_name', $accountName[0]) }}" autocomplete="given-name" required>
+                        </label>
+                        <label class="form-control w-full">
+                            <span class="label-text font-medium text-sm">Uw achternaam</span>
+                            <input class="input input-bordered w-full" name="placer_last_name" data-progress-field value="{{ old('placer_last_name', $accountName[1] ?? '') }}" autocomplete="family-name" required>
+                        </label>
+                        <label class="form-control w-full">
+                            <span class="label-text font-medium text-sm">Uw e-mailadres</span>
+                            <input type="email" class="input input-bordered w-full" name="placer_email" data-progress-field value="{{ old('placer_email', auth()->user()?->email) }}" autocomplete="email" required>
                         </label>
                         <label class="form-control w-full">
                             <span class="label-text font-medium text-sm">Telefoonnummer (optioneel)</span>
                             <input type="tel" class="input input-bordered w-full" name="placer_phone" value="{{ old('placer_phone') }}" autocomplete="tel">
                         </label>
                     </div>
-                    <label class="form-control w-full">
-                        <span class="label-text font-medium text-sm">Uw e-mailadres</span>
-                        <input type="email" class="input input-bordered w-full" name="placer_email" value="{{ old('placer_email', auth()->user()?->email) }}" autocomplete="email" required>
-                    </label>
 
                     @auth
                         <p class="text-sm text-base-content/70">
@@ -246,12 +253,12 @@
                             <div id="account-fields" class="grid grid-cols-1 md:grid-cols-2 gap-4" @unless(old('create_account')) hidden @endunless>
                                 <label class="form-control w-full">
                                     <span class="label-text font-medium text-sm">Kies een wachtwoord</span>
-                                    <input type="password" class="input input-bordered w-full" name="password" autocomplete="new-password" minlength="8" @unless(old('create_account')) disabled @endunless required>
+                                    <input type="password" class="input input-bordered w-full" name="password" data-progress-field autocomplete="new-password" minlength="8" @unless(old('create_account')) disabled @endunless required>
                                     <span class="text-xs text-base-content/60">Minimaal 8 tekens</span>
                                 </label>
                                 <label class="form-control w-full">
                                     <span class="label-text font-medium text-sm">Herhaal wachtwoord</span>
-                                    <input type="password" class="input input-bordered w-full" name="password_confirmation" autocomplete="new-password" minlength="8" @unless(old('create_account')) disabled @endunless required>
+                                    <input type="password" class="input input-bordered w-full" name="password_confirmation" data-progress-field autocomplete="new-password" minlength="8" @unless(old('create_account')) disabled @endunless required>
                                 </label>
                             </div>
 
@@ -265,9 +272,102 @@
                 </div>
             </form>
         </div>
+
+        {{-- Voortgang: meebewegende zijbalk op desktop --}}
+        <aside class="hidden lg:block sticky top-6" aria-label="Voortgang">
+            <div class="rounded-box border border-base-300 bg-base-100 p-5 space-y-4">
+                <div class="flex items-baseline justify-between gap-3">
+                    <h2 class="font-semibold">Voortgang</h2>
+                    <span class="text-2xl font-semibold" data-progress-percent>0%</span>
+                </div>
+                <progress class="progress text-[#5a3a3a] w-full" value="0" max="100" data-progress-bar></progress>
+                <ol class="space-y-2 text-sm" id="progress-steps"></ol>
+            </div>
+        </aside>
+        </div>
+
+        {{-- Voortgang: strook onderin op mobiel --}}
+        <div class="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-base-100 border-t border-base-300 px-4 py-3" aria-hidden="true">
+            <div class="max-w-6xl mx-auto flex items-center gap-3">
+                <progress class="progress text-[#5a3a3a] flex-1" value="0" max="100" data-progress-bar></progress>
+                <span class="text-sm font-semibold whitespace-nowrap"><span data-progress-percent>0%</span> ingevuld</span>
+            </div>
+        </div>
     </section>
 
+    @include('partials.place-picker-script')
+
     <script>
+        // Voortgang: percentage van ingevulde velden (uitgeschakelde secties tellen niet mee) en een checklist per blok.
+        (function () {
+            var form = document.getElementById('notice-form');
+            var sections = Array.prototype.slice.call(form.querySelectorAll('[data-progress-section]'));
+            var list = document.getElementById('progress-steps');
+            var items = sections.map(function (section) {
+                var li = document.createElement('li');
+                li.innerHTML = '<a class="flex items-center gap-2 hover:underline" href="#' + section.id + '">'
+                    + '<i class="ph ph-circle text-base-content/40" aria-hidden="true"></i>'
+                    + '<span></span></a>';
+                li.querySelector('span').textContent = section.dataset.progressSection
+                    + (section.hasAttribute('data-progress-optional') ? ' (optioneel)' : '');
+                list.appendChild(li);
+                return li;
+            });
+
+            function filled(field) {
+                if (field.type === 'file') return field.files.length > 0;
+                var value = field.value || '';
+                if (field.tagName === 'TEXTAREA') value = value.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ');
+                return value.trim() !== '';
+            }
+
+            function activeFields(section) {
+                return Array.prototype.slice.call(section.querySelectorAll('[data-progress-field]')).filter(function (field) {
+                    return !field.disabled && !field.closest('[hidden], fieldset[disabled]');
+                });
+            }
+
+            function update() {
+                var total = 0;
+                var done = 0;
+
+                sections.forEach(function (section, i) {
+                    var inactive = section.hidden || section.disabled;
+                    var fields = activeFields(section);
+                    var count = fields.filter(filled).length;
+                    var complete = fields.length > 0 && count === fields.length;
+
+                    if (!inactive && !section.hasAttribute('data-progress-optional')) {
+                        total += fields.length;
+                        done += count;
+                    }
+
+                    items[i].hidden = inactive;
+                    var icon = items[i].querySelector('i');
+                    icon.className = complete
+                        ? 'ph ph-check-circle text-success'
+                        : 'ph ph-circle text-base-content/40';
+                });
+
+                var percent = total ? Math.round(done / total * 100) : 0;
+                document.querySelectorAll('[data-progress-percent]').forEach(function (el) { el.textContent = percent + '%'; });
+                document.querySelectorAll('[data-progress-bar]').forEach(function (el) { el.value = percent; });
+            }
+
+            var pending;
+            function schedule() {
+                clearTimeout(pending);
+                pending = setTimeout(update, 50);
+            }
+
+            ['input', 'change', 'click', 'keyup', 'drop'].forEach(function (type) {
+                form.addEventListener(type, schedule);
+            });
+            document.addEventListener('click', schedule);
+            window.addEventListener('load', update);
+            update();
+        })();
+
         // Foto: voorbeeld tonen, slepen ondersteunen en weer kunnen verwijderen.
         (function () {
             var dropzone = document.getElementById('photo-dropzone');
@@ -316,24 +416,28 @@
             });
         })();
 
-        // Factuurnaam/-e-mail en contactgegevens vullen elkaar vooraf in, tot de gebruiker een veld zelf aanpast.
+        // Factuurnaam/-e-mail worden vooraf ingevuld met de contactgegevens, tot de gebruiker ze zelf aanpast.
         (function () {
-            [['billing_name', 'placer_name'], ['billing_email', 'placer_email']].forEach(function (pair) {
-                var a = document.querySelector('[name="' + pair[0] + '"]');
-                var b = document.querySelector('[name="' + pair[1] + '"]');
-                if (!a || !b) return;
+            var field = function (name) { return document.querySelector('[name="' + name + '"]'); };
+            var billingName = field('billing_name');
+            var billingEmail = field('billing_email');
+            var firstName = field('placer_first_name');
+            var lastName = field('placer_last_name');
+            var email = field('placer_email');
+            if (!billingName || !billingEmail || !firstName || !lastName || !email) return;
 
-                [a, b].forEach(function (field) {
-                    field.dataset.touched = field.value.trim() !== '' ? '1' : '';
-                });
-
-                [[a, b], [b, a]].forEach(function (fields) {
-                    fields[0].addEventListener('input', function () {
-                        fields[0].dataset.touched = '1';
-                        if (!fields[1].dataset.touched) fields[1].value = fields[0].value;
-                    });
-                });
+            [billingName, billingEmail].forEach(function (target) {
+                target.dataset.touched = target.value.trim() !== '' ? '1' : '';
+                target.addEventListener('input', function () { target.dataset.touched = '1'; });
             });
+
+            var sync = function () {
+                if (!billingName.dataset.touched) billingName.value = (firstName.value.trim() + ' ' + lastName.value.trim()).trim();
+                if (!billingEmail.dataset.touched) billingEmail.value = email.value;
+            };
+
+            [firstName, lastName, email].forEach(function (source) { source.addEventListener('input', sync); });
+            sync();
         })();
 
         // Account aanmaken: wachtwoordvelden alleen tonen (en versturen) als het vinkje aan staat.

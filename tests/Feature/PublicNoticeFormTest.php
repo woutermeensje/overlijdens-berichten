@@ -6,7 +6,9 @@ use App\Mail\AdminFeaturedNoticeMail;
 use App\Models\MemorialNotice;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
@@ -15,11 +17,30 @@ class PublicNoticeFormTest extends TestCase
 {
     use RefreshDatabase;
 
+    private const DELFT_ID = 'wpl-8a1b2c3d4e5f60718293a4b5c6d7e8f9';
+
+    protected function fakeGeocoder(): void
+    {
+        Http::fake(function (Request $request) {
+            if (str_contains($request->url(), '/lookup') && $request['id'] === self::DELFT_ID) {
+                return Http::response(['response' => ['docs' => [[
+                    'id' => self::DELFT_ID,
+                    'type' => 'woonplaats',
+                    'woonplaatsnaam' => 'Delft',
+                    'provincienaam' => 'Zuid-Holland',
+                ]]]]);
+            }
+
+            return Http::response(['response' => ['docs' => []]]);
+        });
+    }
+
     public function test_form_shows_all_fields_on_one_page(): void
     {
         $this->get(route('notice.wizard'))
             ->assertOk()
-            ->assertSee('name="deceased_first_name"', false)
+            ->assertSee('name="deceased_name"', false)
+            ->assertDontSee('name="deceased_last_name"', false)
             ->assertSee('name="type"', false)
             ->assertSee('name="content"', false)
             ->assertSee('Bericht publiceren')
@@ -31,16 +52,16 @@ class PublicNoticeFormTest extends TestCase
         Storage::fake('public');
 
         $this->post(route('notice.wizard.submit'), [
-            'deceased_first_name' => 'Maria',
-            'deceased_last_name' => 'de Vries',
+            'deceased_name' => 'Maria de Vries',
             'born_date' => '1940-03-01',
             'died_date' => '2026-10-10',
             'photo' => UploadedFile::fake()->image('maria.jpg'),
             'type' => MemorialNotice::TYPE_FAMILIEBERICHT,
             'city' => 'Delft',
-            'province' => 'Zuid-Holland',
+            'place_id' => self::DELFT_ID,
             'content' => '<p>In liefdevolle herinnering.</p><script>alert(1)</script>',
-            'placer_name' => 'Jan de Vries',
+            'placer_first_name' => 'Jan',
+            'placer_last_name' => 'de Vries',
             'placer_email' => 'jan@example.com',
             'placer_phone' => '06-12345678',
         ])->assertRedirect(route('home'));
@@ -61,9 +82,9 @@ class PublicNoticeFormTest extends TestCase
     public function test_placer_contact_details_are_required(): void
     {
         $this->from(route('notice.wizard'))
-            ->post(route('notice.wizard.submit'), $this->validPayload(['placer_name' => '', 'placer_email' => 'geen-email']))
+            ->post(route('notice.wizard.submit'), $this->validPayload(['placer_first_name' => '', 'placer_last_name' => '', 'placer_email' => 'geen-email']))
             ->assertRedirect(route('notice.wizard'))
-            ->assertSessionHasErrors(['placer_name', 'placer_email']);
+            ->assertSessionHasErrors(['placer_first_name', 'placer_last_name', 'placer_email']);
 
         $this->assertDatabaseCount('memorial_notices', 0);
     }
@@ -146,10 +167,10 @@ class PublicNoticeFormTest extends TestCase
     public function test_missing_fields_are_reported_and_nothing_is_saved(): void
     {
         $this->from(route('notice.wizard'))
-            ->post(route('notice.wizard.submit'), ['deceased_last_name' => 'de Vries'])
+            ->post(route('notice.wizard.submit'), ['born_date' => '1940-03-01'])
             ->assertRedirect(route('notice.wizard'))
-            ->assertSessionHasErrors(['deceased_first_name', 'died_date', 'type'])
-            ->assertSessionDoesntHaveErrors(['deceased_last_name', 'born_date', 'city', 'province', 'content']);
+            ->assertSessionHasErrors(['deceased_name', 'died_date', 'type'])
+            ->assertSessionDoesntHaveErrors(['born_date', 'city', 'province', 'content']);
 
         $this->assertDatabaseCount('memorial_notices', 0);
     }
@@ -157,10 +178,11 @@ class PublicNoticeFormTest extends TestCase
     public function test_notice_can_be_placed_with_only_required_fields(): void
     {
         $this->post(route('notice.wizard.submit'), [
-            'deceased_first_name' => 'Maria',
+            'deceased_name' => 'Maria',
             'died_date' => '2026-10-10',
             'type' => MemorialNotice::TYPE_OVERLIJDENSBERICHT,
-            'placer_name' => 'Jan de Vries',
+            'placer_first_name' => 'Jan',
+            'placer_last_name' => 'de Vries',
             'placer_email' => 'jan@example.com',
         ])->assertRedirect(route('home'));
 
@@ -234,6 +256,53 @@ class PublicNoticeFormTest extends TestCase
         Mail::assertNothingSent();
     }
 
+    public function test_full_name_with_multiple_first_names_is_kept_intact(): void
+    {
+        $this->post(route('notice.wizard.submit'), $this->validPayload([
+            'deceased_name' => '  Johanna Maria   Petronella van der Berg ',
+        ]))->assertRedirect(route('home'));
+
+        $notice = MemorialNotice::query()->sole();
+        $this->assertSame('Johanna Maria Petronella van der Berg', $notice->title);
+        $this->assertSame('johanna-maria-petronella-van-der-berg', $notice->slug);
+        $this->get(route('notice.show', $notice->slug))->assertSee('Johanna Maria Petronella van der Berg');
+    }
+
+    public function test_city_and_province_come_from_the_chosen_place(): void
+    {
+        $this->post(route('notice.wizard.submit'), $this->validPayload([
+            'city' => 'delft (getypt)',
+            'province' => 'Verzonnen provincie',
+        ]))->assertRedirect(route('home'));
+
+        $notice = MemorialNotice::query()->sole();
+        $this->assertSame('Delft', $notice->city);
+        $this->assertSame('Zuid-Holland', $notice->province);
+    }
+
+    public function test_typed_place_without_choice_from_list_is_rejected(): void
+    {
+        $this->from(route('notice.wizard'))
+            ->post(route('notice.wizard.submit'), $this->validPayload(['city' => 'Ergensdorp', 'place_id' => '']))
+            ->assertRedirect(route('notice.wizard'))
+            ->assertSessionHasErrors('city');
+
+        $this->assertDatabaseCount('memorial_notices', 0);
+    }
+
+    public function test_typed_place_is_kept_when_pdok_is_unreachable(): void
+    {
+        Http::swap(new \Illuminate\Http\Client\Factory);
+        Http::fake(fn () => throw new \Illuminate\Http\Client\ConnectionException('PDOK onbereikbaar'));
+
+        $this->post(route('notice.wizard.submit'), $this->validPayload(['city' => 'Delft', 'place_id' => self::DELFT_ID]))
+            ->assertSessionHasNoErrors();
+
+        $notice = MemorialNotice::query()->sole();
+        $this->assertSame('Delft', $notice->city);
+        $this->assertNull($notice->province);
+    }
+
     public function test_admins_see_placer_contact_details_but_owners_do_not(): void
     {
         $this->post(route('notice.wizard.submit'), $this->validPayload([
@@ -296,15 +365,15 @@ class PublicNoticeFormTest extends TestCase
     private function validPayload(array $overrides = []): array
     {
         return array_merge([
-            'deceased_first_name' => 'Maria',
-            'deceased_last_name' => 'de Vries',
+            'deceased_name' => 'Maria de Vries',
             'born_date' => '1940-03-01',
             'died_date' => '2026-10-10',
             'type' => MemorialNotice::TYPE_OVERLIJDENSBERICHT,
             'city' => 'Delft',
-            'province' => 'Zuid-Holland',
+            'place_id' => self::DELFT_ID,
             'content' => '<p>In liefdevolle herinnering.</p>',
-            'placer_name' => 'Jan de Vries',
+            'placer_first_name' => 'Jan',
+            'placer_last_name' => 'de Vries',
             'placer_email' => 'jan@example.com',
         ], $overrides);
     }

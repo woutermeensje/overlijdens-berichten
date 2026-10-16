@@ -5,14 +5,17 @@ namespace App\Http\Controllers;
 use App\Mail\AdminFeaturedNoticeMail;
 use App\Models\MemorialNotice;
 use App\Models\User;
+use App\Services\Geocoder;
 use App\Support\NoticeContentSanitizer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Throwable;
 
 class PublicNoticeWizardController extends Controller
 {
@@ -21,20 +24,19 @@ class PublicNoticeWizardController extends Controller
         return view('notice-wizard.form');
     }
 
-    public function submit(Request $request): RedirectResponse
+    public function submit(Request $request, Geocoder $geocoder): RedirectResponse
     {
         $data = $request->validate([
-            'deceased_first_name' => ['required', 'string', 'max:120'],
-            'deceased_last_name' => ['nullable', 'string', 'max:120'],
+            'deceased_name' => ['required', 'string', 'max:120'],
             'born_date' => ['nullable', 'date'],
             'died_date' => ['required', 'date', Rule::when($request->filled('born_date'), 'after_or_equal:born_date')],
             'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'type' => ['required', Rule::in([...array_keys(MemorialNotice::typeLabels()), MemorialNotice::FEATURED_OPTION])],
             'city' => ['nullable', 'string', 'max:120'],
-            'province' => ['nullable', 'string', 'max:120'],
-            'title' => ['nullable', 'string', 'max:190'],
+            'place_id' => ['nullable', 'string', 'max:64'],
             'content' => ['nullable', 'string'],
-            'placer_name' => ['required', 'string', 'max:120'],
+            'placer_first_name' => ['required', 'string', 'max:60'],
+            'placer_last_name' => ['required', 'string', 'max:60'],
             'placer_email' => ['required', 'email', 'max:190'],
             'placer_phone' => ['nullable', 'string', 'max:60'],
             'create_account' => ['boolean'],
@@ -47,6 +49,15 @@ class PublicNoticeWizardController extends Controller
             'billing_city' => ['exclude_unless:type,'.MemorialNotice::FEATURED_OPTION, 'required', 'string', 'max:120'],
         ]);
 
+        $data['placer_name'] = trim($data['placer_first_name']).' '.trim($data['placer_last_name']);
+
+        $place = $this->resolvePlace($geocoder, $data);
+        if ($place === false) {
+            return back()
+                ->withInput($request->except(['password', 'password_confirmation', 'photo']))
+                ->withErrors(['city' => 'Kies de woonplaats uit de lijst met suggesties.']);
+        }
+
         $createsAccount = ! $request->user() && ($data['create_account'] ?? false);
         $owner = $this->resolveOwner($request, $data);
         if ($owner === null) {
@@ -58,8 +69,9 @@ class PublicNoticeWizardController extends Controller
         // Uitgelicht is een betaald overlijdensbericht: direct live, factuur volgt achteraf.
         $isFeatured = $data['type'] === MemorialNotice::FEATURED_OPTION;
 
-        $displayName = trim($data['deceased_first_name'].' '.($data['deceased_last_name'] ?? ''));
-        $title = trim((string) ($data['title'] ?? '')) ?: $displayName;
+        $displayName = trim(preg_replace('/\s+/', ' ', $data['deceased_name']));
+        // De volledige naam van de overledene is de titel van het bericht.
+        $title = $displayName;
 
         $photoUrl = null;
         if ($request->hasFile('photo')) {
@@ -71,12 +83,14 @@ class PublicNoticeWizardController extends Controller
             'title' => $title,
             'slug' => $this->uniqueSlug($title),
             'type' => $isFeatured ? MemorialNotice::TYPE_OVERLIJDENSBERICHT : $data['type'],
-            'deceased_first_name' => $data['deceased_first_name'],
-            'deceased_last_name' => $data['deceased_last_name'] ?? null,
+            // Eén veld voor de volledige naam (ook bij meerdere voornamen en tussenvoegsels);
+            // de naamweergave plakt voor- en achternaam toch al aan elkaar.
+            'deceased_first_name' => $displayName,
+            'deceased_last_name' => null,
             'photo_url' => $photoUrl,
             'content' => NoticeContentSanitizer::clean($data['content'] ?? ''),
-            'province' => $data['province'] ?? null,
-            'city' => $data['city'] ?? null,
+            'province' => $place['province'] ?? null,
+            'city' => $place['name'] ?? null,
             'born_date' => $data['born_date'] ?? null,
             'died_date' => $data['died_date'],
             'status' => 'published',
@@ -111,6 +125,29 @@ class PublicNoticeWizardController extends Controller
         }
 
         return redirect()->route('home')->with('status', 'Bericht geplaatst.');
+    }
+
+    /**
+     * Woonplaats en provincie komen uit de PDOK-woonplaats die in de suggestielijst is gekozen.
+     * null = geen plaats opgegeven, false = geen geldige keuze uit de lijst.
+     *
+     * @return array{name: string, province: string|null}|false|null
+     */
+    private function resolvePlace(Geocoder $geocoder, array $data): array|false|null
+    {
+        $city = trim((string) ($data['city'] ?? ''));
+        if ($city === '') {
+            return null;
+        }
+
+        try {
+            return $geocoder->placeById((string) ($data['place_id'] ?? '')) ?? false;
+        } catch (Throwable $e) {
+            // PDOK onbereikbaar: het bericht niet tegenhouden, de getypte plaats overnemen.
+            Log::warning('Plaats controleren mislukt', ['place_id' => $data['place_id'] ?? null, 'error' => $e->getMessage()]);
+
+            return ['name' => $city, 'province' => null];
+        }
     }
 
     /**

@@ -125,7 +125,7 @@
             </aside>
         </div>
 
-        <section id="condoleances" class="bg-base-100 border border-base-300 rounded-box p-5 md:p-6">
+        <section id="condoleances">
             <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-4">
                 <div>
                     <h2 class="text-2xl font-semibold">Reacties en condoleances</h2>

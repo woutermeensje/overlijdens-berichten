@@ -25,6 +25,7 @@
 @section('content')
     @include('partials.newsletter-alert-card', [
         'region' => null,
+        'brandAsHeading' => true,
     ])
 
     <div class="max-w-[1080px] mx-auto mt-14 flex flex-col lg:flex-row lg:items-start gap-4">
@@ -32,7 +33,7 @@
             <section class="card bg-base-100 border border-base-300">
                 <div class="card-body gap-4">
                     <div>
-                        <h1 class="card-title text-2xl">Laatste overlijdensberichten</h1>
+                        <h2 class="card-title text-2xl">Filter</h2>
                         <p class="text-sm text-base-content/70">Zoek op naam, type bericht of in de buurt van een plaats.</p>
                     </div>
 

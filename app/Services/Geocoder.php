@@ -124,7 +124,7 @@ class Geocoder
     /**
      * Haalt een woonplaats op via het PDOK-id dat de gebruiker in de suggestielijst koos.
      *
-     * @return array{id: string, name: string}|null  null als het id geen bestaande woonplaats is
+     * @return array{id: string, name: string, province: string|null}|null  null als het id geen bestaande woonplaats is
      *
      * @throws \Illuminate\Http\Client\ConnectionException|\Illuminate\Http\Client\RequestException als PDOK niet bereikbaar is
      */
@@ -134,14 +134,14 @@ class Geocoder
             return null;
         }
 
-        $result = Cache::remember('geocoder:place-id:'.$id, now()->addDays(30), function () use ($id) {
+        $result = Cache::remember('geocoder:place-id:v2:'.$id, now()->addDays(30), function () use ($id) {
             $doc = Http::timeout(5)
-                ->get(self::LOOKUP_ENDPOINT, ['id' => $id, 'fl' => 'id,type,woonplaatsnaam'])
+                ->get(self::LOOKUP_ENDPOINT, ['id' => $id, 'fl' => 'id,type,woonplaatsnaam,provincienaam'])
                 ->throw()
                 ->json('response.docs.0');
 
             return ['match' => is_array($doc) && ($doc['type'] ?? null) === 'woonplaats' && isset($doc['woonplaatsnaam'])
-                ? ['id' => $id, 'name' => (string) $doc['woonplaatsnaam']]
+                ? ['id' => $id, 'name' => (string) $doc['woonplaatsnaam'], 'province' => $doc['provincienaam'] ?? null]
                 : null];
         });
 
