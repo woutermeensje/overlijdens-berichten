@@ -138,7 +138,7 @@
                     </div>
                     {{-- Naam van de overledene, niet van de invuller: wachtwoordmanagers/autofill uitschakelen. --}}
                     <label class="form-control w-full">
-                        <span class="label-text font-medium text-sm">Volledige naam</span>
+                        <span class="label-text font-medium text-sm">Volledige naam <span class="font-normal text-base-content/60">(tevens de titel van het bericht)</span> <span class="text-error" aria-hidden="true">*</span><span class="sr-only">(verplicht)</span></span>
                         <input class="input input-bordered w-full" name="deceased_name" data-progress-field value="{{ old('deceased_name') }}"
                                placeholder="Bijvoorbeeld Johanna Maria van der Berg" autocomplete="off" data-1p-ignore data-lpignore="true" required>
                     </label>
@@ -151,11 +151,11 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <label class="form-control w-full">
-                            <span class="label-text font-medium text-sm">Geboortedatum</span>
+                            <span class="label-text font-medium text-sm">Geboortedatum <span class="font-normal text-base-content/60">(optioneel)</span></span>
                             <input type="date" class="input input-bordered w-full" name="born_date" data-progress-field value="{{ old('born_date') }}">
                         </label>
                         <label class="form-control w-full">
-                            <span class="label-text font-medium text-sm">Overlijdensdatum</span>
+                            <span class="label-text font-medium text-sm">Overlijdensdatum <span class="text-error" aria-hidden="true">*</span><span class="sr-only">(verplicht)</span></span>
                             <input type="date" class="input input-bordered w-full" name="died_date" data-progress-field value="{{ old('died_date') }}" required>
                         </label>
                     </div>
