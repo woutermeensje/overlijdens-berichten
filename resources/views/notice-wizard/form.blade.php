@@ -50,7 +50,7 @@
                                 'note' => 'excl. btw',
                                 'noteClass' => 'text-base-content/60',
                             ]);
-                        $selectedType = old('type', \App\Models\MemorialNotice::TYPE_OVERLIJDENSBERICHT);
+                        $selectedType = old('type', request()->query('type', \App\Models\MemorialNotice::TYPE_OVERLIJDENSBERICHT));
                         if (! $typeOptions->has($selectedType)) {
                             $selectedType = \App\Models\MemorialNotice::TYPE_OVERLIJDENSBERICHT;
                         }
@@ -180,6 +180,13 @@
                         <p class="text-xs text-base-content/60 {{ $oldPlace ? '' : 'hidden' }}" data-place-details>{{ $oldPlace ? ($oldPlace['province'] ?? '').' · Nederland' : '' }}</p>
                         <p class="hidden text-error text-xs" data-place-error>Kies een plaats uit de lijst met suggesties.</p>
                     </div>
+
+                    <label class="form-control w-full">
+                        <span class="label-text font-medium text-sm">Link naar online condoleanceregister (optioneel)</span>
+                        <input type="url" class="input input-bordered w-full" name="condolence_url" value="{{ old('condolence_url') }}"
+                               placeholder="https://..." autocomplete="off" inputmode="url">
+                        <span class="text-xs text-base-content/60">Bijvoorbeeld het condoleanceregister of de herinneringspagina bij de uitvaartondernemer.</span>
+                    </label>
                 </div>
 
                 <div id="sectie-foto" data-progress-section="Foto" data-progress-optional class="rounded-box border border-base-300 bg-base-100 p-4 md:p-5 space-y-4 scroll-mt-6">

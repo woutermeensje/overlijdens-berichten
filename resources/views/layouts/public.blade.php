@@ -126,7 +126,7 @@
                         <i class="ph ph-list"></i>
                     </label>
                     <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 bg-base-100 rounded-box w-72 border border-base-300">
-                        <li><a href="{{ route('blog.index') }}"><i class="ph ph-newspaper"></i> Blog</a></li>
+                        <li><a href="{{ route('options') }}"><i class="ph ph-list-checks"></i> Opties</a></li>
                         <li><a href="{{ route('cities.index') }}"><i class="ph ph-map-pin-area"></i> Steden</a></li>
                         <li><a href="{{ route('notice.wizard') }}"><i class="ph ph-note-pencil"></i> Bericht plaatsen</a></li>
                         @auth
@@ -140,7 +140,7 @@
             </div>
             <div class="navbar-center hidden lg:flex">
                 <ul class="menu menu-horizontal px-1 gap-1">
-                    <li><a href="{{ route('blog.index') }}"><i class="ph ph-newspaper"></i> Blog</a></li>
+                    <li><a href="{{ route('options') }}"><i class="ph ph-list-checks"></i> Opties</a></li>
                     <li><a href="{{ route('cities.index') }}"><i class="ph ph-map-pin-area"></i> Steden</a></li>
                     <li><a href="{{ route('notice.wizard') }}"><i class="ph ph-note-pencil"></i> Bericht plaatsen</a></li>
                 </ul>

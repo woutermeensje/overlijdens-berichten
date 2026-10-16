@@ -64,11 +64,13 @@ class PublicNoticeFormTest extends TestCase
             'placer_last_name' => 'de Vries',
             'placer_email' => 'jan@example.com',
             'placer_phone' => '06-12345678',
+            'condolence_url' => 'https://www.uitvaart.nl/condoleance/maria-de-vries',
         ])->assertRedirect(route('home'));
 
         $notice = MemorialNotice::query()->sole();
 
         $this->assertSame('Maria de Vries', $notice->title);
+        $this->assertSame('https://www.uitvaart.nl/condoleance/maria-de-vries', $notice->condolence_url);
         $this->assertSame('maria-de-vries', $notice->slug);
         $this->assertSame(MemorialNotice::TYPE_FAMILIEBERICHT, $notice->type);
         $this->assertSame('published', $notice->status);
@@ -362,6 +364,20 @@ class PublicNoticeFormTest extends TestCase
      * @param  array<string, mixed>  $overrides
      * @return array<string, mixed>
      */
+    public function test_options_page_lists_packages_and_preselects_featured(): void
+    {
+        $this->get(route('options'))
+            ->assertOk()
+            ->assertSee('Gratis')
+            ->assertSee('€ 175,00')
+            ->assertSee('Uitvaartondernemer')
+            ->assertSee('In overleg');
+
+        $this->get(route('notice.wizard', ['type' => MemorialNotice::FEATURED_OPTION]))
+            ->assertOk()
+            ->assertSee('value="'.MemorialNotice::FEATURED_OPTION.'"', false);
+    }
+
     private function validPayload(array $overrides = []): array
     {
         return array_merge([
