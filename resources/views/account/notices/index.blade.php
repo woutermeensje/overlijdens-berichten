@@ -14,6 +14,9 @@
                 <tr>
                     <th>Titel</th>
                     <th>Type</th>
+                    @if(auth()->user()->isAdmin())
+                        <th>Geplaatst door</th>
+                    @endif
                     <th>Datum</th>
                     <th class="text-right">Acties</th>
                 </tr>
@@ -23,6 +26,16 @@
                     <tr>
                         <td>{{ $notice->title }}</td>
                         <td><span class="badge">{{ \App\Models\MemorialNotice::typeLabels()[$notice->type] ?? ucfirst($notice->type) }}</span></td>
+                        @if(auth()->user()->isAdmin())
+                            <td class="text-sm">
+                                @if($notice->placer_name || $notice->placer_email)
+                                    <div>{{ $notice->placer_name }}</div>
+                                    <a href="mailto:{{ $notice->placer_email }}" class="link text-base-content/70">{{ $notice->placer_email }}</a>
+                                @else
+                                    <span class="text-base-content/50">—</span>
+                                @endif
+                            </td>
+                        @endif
                         <td>{{ $notice->created_at->format('d-m-Y H:i') }}</td>
                         <td>
                             <div class="flex justify-end gap-2">
@@ -36,7 +49,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="4">Je hebt nog geen berichten geplaatst.</td></tr>
+                    <tr><td colspan="{{ auth()->user()->isAdmin() ? 5 : 4 }}">Je hebt nog geen berichten geplaatst.</td></tr>
                 @endforelse
             </tbody>
         </table>

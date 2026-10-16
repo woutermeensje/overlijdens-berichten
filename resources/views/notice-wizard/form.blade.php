@@ -316,6 +316,26 @@
             });
         })();
 
+        // Factuurnaam/-e-mail en contactgegevens vullen elkaar vooraf in, tot de gebruiker een veld zelf aanpast.
+        (function () {
+            [['billing_name', 'placer_name'], ['billing_email', 'placer_email']].forEach(function (pair) {
+                var a = document.querySelector('[name="' + pair[0] + '"]');
+                var b = document.querySelector('[name="' + pair[1] + '"]');
+                if (!a || !b) return;
+
+                [a, b].forEach(function (field) {
+                    field.dataset.touched = field.value.trim() !== '' ? '1' : '';
+                });
+
+                [[a, b], [b, a]].forEach(function (fields) {
+                    fields[0].addEventListener('input', function () {
+                        fields[0].dataset.touched = '1';
+                        if (!fields[1].dataset.touched) fields[1].value = fields[0].value;
+                    });
+                });
+            });
+        })();
+
         // Account aanmaken: wachtwoordvelden alleen tonen (en versturen) als het vinkje aan staat.
         (function () {
             var checkbox = document.getElementById('create-account');

@@ -4,5 +4,6 @@
 
 @section('content')
     <h1 class="text-2xl font-semibold mb-4">Bericht bewerken</h1>
+    @include('account.notices._placer', ['notice' => $notice])
     @include('account.notices._form', ['notice' => $notice])
 @endsection

@@ -71,6 +71,24 @@
                     <td>{{ $billing['address'] ?? '' }}<br>{{ $billing['postcode'] ?? '' }} {{ $billing['city'] ?? '' }}</td>
                 </tr>
             </table>
+
+            <h2>Contactgegevens plaatser</h2>
+            <table>
+                <tr>
+                    <td>Naam</td>
+                    <td>{{ $notice->placer_name }}</td>
+                </tr>
+                <tr>
+                    <td>E-mailadres</td>
+                    <td>{{ $notice->placer_email }}</td>
+                </tr>
+                @if($notice->placer_phone)
+                    <tr>
+                        <td>Telefoon</td>
+                        <td>{{ $notice->placer_phone }}</td>
+                    </tr>
+                @endif
+            </table>
         </div>
         <div class="footer">
             <p>Overlijdensberichten.nl – intern bericht</p>

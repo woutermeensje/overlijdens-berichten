@@ -219,6 +219,7 @@ class PublicNoticeFormTest extends TestCase
         $this->assertSame('jan@example.com', $notice->billing_details['email']);
 
         Mail::assertSent(AdminFeaturedNoticeMail::class, fn ($mail) => $mail->hasTo('admin@example.com'));
+        Mail::assertSent(AdminFeaturedNoticeMail::class, fn ($mail) => str_contains($mail->render(), 'Contactgegevens plaatser'));
     }
 
     public function test_billing_fields_are_ignored_for_free_notices(): void
@@ -231,6 +232,25 @@ class PublicNoticeFormTest extends TestCase
 
         $this->assertNull(MemorialNotice::query()->sole()->billing_details);
         Mail::assertNothingSent();
+    }
+
+    public function test_admins_see_placer_contact_details_but_owners_do_not(): void
+    {
+        $this->post(route('notice.wizard.submit'), $this->validPayload([
+            'placer_phone' => '06-12345678',
+            'create_account' => '1',
+            'password' => 'geheim-wachtwoord',
+            'password_confirmation' => 'geheim-wachtwoord',
+        ]));
+        $notice = MemorialNotice::query()->sole();
+
+        $this->get(route('account.notices.edit', $notice))->assertOk()->assertDontSee('Geplaatst door');
+
+        $this->actingAs(User::factory()->create(['is_admin' => true]));
+        $this->get(route('account.notices.index'))->assertSee('jan@example.com');
+        $this->get(route('account.notices.edit', $notice))
+            ->assertSee('Geplaatst door')
+            ->assertSee('06-12345678');
     }
 
     /**
