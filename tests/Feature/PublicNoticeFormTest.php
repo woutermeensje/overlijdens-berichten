@@ -40,6 +40,9 @@ class PublicNoticeFormTest extends TestCase
             'city' => 'Delft',
             'province' => 'Zuid-Holland',
             'content' => '<p>In liefdevolle herinnering.</p><script>alert(1)</script>',
+            'placer_name' => 'Jan de Vries',
+            'placer_email' => 'jan@example.com',
+            'placer_phone' => '06-12345678',
         ])->assertRedirect(route('home'));
 
         $notice = MemorialNotice::query()->sole();
@@ -50,6 +53,94 @@ class PublicNoticeFormTest extends TestCase
         $this->assertSame('published', $notice->status);
         $this->assertStringNotContainsString('<script>', $notice->content);
         $this->assertNotNull($notice->photo_url);
+        $this->assertSame('jan@example.com', $notice->placer_email);
+        $this->assertSame('06-12345678', $notice->placer_phone);
+        $this->assertGuest();
+    }
+
+    public function test_placer_contact_details_are_required(): void
+    {
+        $this->from(route('notice.wizard'))
+            ->post(route('notice.wizard.submit'), $this->validPayload(['placer_name' => '', 'placer_email' => 'geen-email']))
+            ->assertRedirect(route('notice.wizard'))
+            ->assertSessionHasErrors(['placer_name', 'placer_email']);
+
+        $this->assertDatabaseCount('memorial_notices', 0);
+    }
+
+    public function test_placer_can_create_an_account_and_edit_the_notice_afterwards(): void
+    {
+        $this->post(route('notice.wizard.submit'), $this->validPayload([
+            'create_account' => '1',
+            'password' => 'geheim-wachtwoord',
+            'password_confirmation' => 'geheim-wachtwoord',
+        ]))->assertRedirect(route('account.notices.index'));
+
+        $user = User::query()->where('email', 'jan@example.com')->sole();
+        $notice = MemorialNotice::query()->sole();
+
+        $this->assertAuthenticatedAs($user);
+        $this->assertFalse($user->isAdmin());
+        $this->assertTrue($notice->user->is($user));
+
+        $this->get(route('account.notices.index'))->assertOk()->assertSee('Maria de Vries');
+        $this->get(route('account.notices.edit', $notice))->assertOk();
+        $this->get(route('account.dashboard'))->assertForbidden();
+    }
+
+    public function test_account_creation_requires_a_confirmed_password(): void
+    {
+        $this->from(route('notice.wizard'))
+            ->post(route('notice.wizard.submit'), $this->validPayload([
+                'create_account' => '1',
+                'password' => 'geheim-wachtwoord',
+                'password_confirmation' => 'iets-anders',
+            ]))
+            ->assertSessionHasErrors('password');
+
+        $this->assertGuest();
+        $this->assertDatabaseCount('memorial_notices', 0);
+    }
+
+    public function test_existing_email_cannot_create_a_second_account(): void
+    {
+        User::factory()->create(['email' => 'jan@example.com']);
+
+        $this->from(route('notice.wizard'))
+            ->post(route('notice.wizard.submit'), $this->validPayload([
+                'create_account' => '1',
+                'password' => 'geheim-wachtwoord',
+                'password_confirmation' => 'geheim-wachtwoord',
+            ]))
+            ->assertRedirect(route('notice.wizard'))
+            ->assertSessionHasErrors('placer_email');
+
+        $this->assertGuest();
+        $this->assertDatabaseCount('memorial_notices', 0);
+    }
+
+    public function test_logged_in_user_places_notice_on_own_account(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->post(route('notice.wizard.submit'), $this->validPayload())
+            ->assertRedirect(route('home'));
+
+        $this->assertTrue(MemorialNotice::query()->sole()->user->is($user));
+    }
+
+    public function test_users_cannot_manage_notices_of_others(): void
+    {
+        $this->post(route('notice.wizard.submit'), $this->validPayload());
+        $notice = MemorialNotice::query()->sole();
+
+        $this->actingAs(User::factory()->create())
+            ->get(route('account.notices.edit', $notice))
+            ->assertForbidden();
+
+        $this->delete(route('account.notices.destroy', $notice))->assertForbidden();
+        $this->get(route('account.notices.index'))->assertOk()->assertDontSee('Maria de Vries');
     }
 
     public function test_missing_fields_are_reported_and_nothing_is_saved(): void
@@ -69,6 +160,8 @@ class PublicNoticeFormTest extends TestCase
             'deceased_first_name' => 'Maria',
             'died_date' => '2026-10-10',
             'type' => MemorialNotice::TYPE_OVERLIJDENSBERICHT,
+            'placer_name' => 'Jan de Vries',
+            'placer_email' => 'jan@example.com',
         ])->assertRedirect(route('home'));
 
         $notice = MemorialNotice::query()->sole();
@@ -155,6 +248,8 @@ class PublicNoticeFormTest extends TestCase
             'city' => 'Delft',
             'province' => 'Zuid-Holland',
             'content' => '<p>In liefdevolle herinnering.</p>',
+            'placer_name' => 'Jan de Vries',
+            'placer_email' => 'jan@example.com',
         ], $overrides);
     }
 }

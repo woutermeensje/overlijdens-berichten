@@ -10,14 +10,14 @@ class AdminAccessTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_non_admin_cannot_log_in(): void
+    public function test_non_admin_logs_in_to_own_notices(): void
     {
         $user = User::factory()->create(['password' => 'geheim123']);
 
         $this->post(route('login.attempt'), ['email' => $user->email, 'password' => 'geheim123'])
-            ->assertSessionHasErrors('email');
+            ->assertRedirect(route('account.notices.index'));
 
-        $this->assertGuest();
+        $this->assertAuthenticatedAs($user);
     }
 
     public function test_admin_can_log_in(): void
@@ -30,15 +30,16 @@ class AdminAccessTest extends TestCase
         $this->assertAuthenticatedAs($admin);
     }
 
-    public function test_account_area_is_admin_only(): void
+    public function test_admin_parts_of_account_area_are_admin_only(): void
     {
-        $this->actingAs(User::factory()->create())
-            ->get(route('account.notices.index'))
-            ->assertForbidden();
+        $this->actingAs(User::factory()->create());
+        $this->get(route('account.dashboard'))->assertForbidden();
+        $this->get(route('account.notices.create'))->assertForbidden();
+        $this->get(route('account.notices.index'))->assertOk();
 
-        $this->actingAs(User::factory()->create(['is_admin' => true]))
-            ->get(route('account.notices.index'))
-            ->assertOk();
+        $this->actingAs(User::factory()->create(['is_admin' => true]));
+        $this->get(route('account.dashboard'))->assertOk();
+        $this->get(route('account.notices.create'))->assertOk();
     }
 
     public function test_registration_is_removed(): void

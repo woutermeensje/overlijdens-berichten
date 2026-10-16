@@ -57,6 +57,13 @@
             box-shadow: none !important;
         }
 
+        /* daisyUI 5 kent .form-control niet meer: label boven het veld, met ruimte ertussen */
+        .form-control {
+            display: flex;
+            flex-direction: column;
+            gap: 0.375rem;
+        }
+
         /* Eén border-stijl voor het hele platform: 1px solid base-300, radius 5px */
         [data-theme="memorial"] {
             --radius-box: 5px;
@@ -123,9 +130,15 @@
                 @include('partials.logo', ['class' => 'justify-start'])
 
                 <ul class="menu bg-base-100 rounded-box">
-                    <li><a class="{{ request()->routeIs('account.dashboard') ? 'active' : '' }}" href="{{ route('account.dashboard') }}"><i class="ph ph-house"></i> Dashboard</a></li>
+                    @if(auth()->user()->isAdmin())
+                        <li><a class="{{ request()->routeIs('account.dashboard') ? 'active' : '' }}" href="{{ route('account.dashboard') }}"><i class="ph ph-house"></i> Dashboard</a></li>
+                    @endif
                     <li><a class="{{ request()->routeIs('account.notices.index') ? 'active' : '' }}" href="{{ route('account.notices.index') }}"><i class="ph ph-list-bullets"></i> Mijn berichten</a></li>
-                    <li><a class="{{ request()->routeIs('account.notices.create') ? 'active' : '' }}" href="{{ route('account.notices.create') }}"><i class="ph ph-plus-circle"></i> Nieuw bericht</a></li>
+                    @if(auth()->user()->isAdmin())
+                        <li><a class="{{ request()->routeIs('account.notices.create') ? 'active' : '' }}" href="{{ route('account.notices.create') }}"><i class="ph ph-plus-circle"></i> Nieuw bericht</a></li>
+                    @else
+                        <li><a href="{{ route('notice.wizard') }}"><i class="ph ph-plus-circle"></i> Nieuw bericht</a></li>
+                    @endif
                 </ul>
 
                 <div class="mt-auto">

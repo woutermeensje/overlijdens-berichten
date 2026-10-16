@@ -21,8 +21,7 @@ class AuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        // Alleen admins hebben toegang tot de beheeromgeving.
-        if (!Auth::attempt([...$credentials, 'is_admin' => true], $request->boolean('remember'))) {
+        if (!Auth::attempt($credentials, $request->boolean('remember'))) {
             return back()
                 ->withErrors(['email' => 'De combinatie van e-mail en wachtwoord is onjuist.'])
                 ->onlyInput('email');
@@ -30,7 +29,10 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->route('account.dashboard');
+        // Admins beheren alles; andere accounts zien alleen hun eigen berichten.
+        return redirect()->intended(
+            $request->user()->isAdmin() ? route('account.dashboard') : route('account.notices.index')
+        );
     }
 
     public function logout(Request $request): RedirectResponse

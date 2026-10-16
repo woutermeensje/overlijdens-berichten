@@ -79,6 +79,13 @@
             box-shadow: none !important;
         }
 
+        /* daisyUI 5 kent .form-control niet meer: label boven het veld, met ruimte ertussen */
+        .form-control {
+            display: flex;
+            flex-direction: column;
+            gap: 0.375rem;
+        }
+
         /* Eén border-stijl voor het hele platform: 1px solid base-300, radius 5px */
         [data-theme="memorial"] {
             --radius-box: 5px;
@@ -123,7 +130,7 @@
                         <li><a href="{{ route('cities.index') }}"><i class="ph ph-map-pin-area"></i> Steden</a></li>
                         <li><a href="{{ route('notice.wizard') }}"><i class="ph ph-note-pencil"></i> Bericht plaatsen</a></li>
                         @auth
-                            <li><a href="{{ route('account.dashboard') }}"><i class="ph ph-house"></i> Account</a></li>
+                            <li><a href="{{ auth()->user()->isAdmin() ? route('account.dashboard') : route('account.notices.index') }}"><i class="ph ph-house"></i> Account</a></li>
                         @endauth
                     </ul>
                 </div>
@@ -138,7 +145,7 @@
             </div>
             <div class="navbar-end gap-2">
                 @auth
-                    <a href="{{ route('account.dashboard') }}" class="btn btn-ghost btn-sm"><i class="ph ph-house"></i> Account</a>
+                    <a href="{{ auth()->user()->isAdmin() ? route('account.dashboard') : route('account.notices.index') }}" class="btn btn-ghost btn-sm"><i class="ph ph-house"></i> Account</a>
                     <form method="post" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" class="btn btn-outline btn-sm"><i class="ph ph-sign-out"></i> <span class="hidden sm:inline">Uitloggen</span></button>

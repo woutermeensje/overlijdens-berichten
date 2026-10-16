@@ -5,7 +5,7 @@
 @section('content')
     <div class="flex justify-between items-center gap-3 mb-4">
         <h1 class="text-2xl font-semibold">Mijn berichten</h1>
-        <a href="{{ route('account.notices.create') }}" class="btn btn-primary">Nieuw bericht</a>
+        <a href="{{ auth()->user()->isAdmin() ? route('account.notices.create') : route('notice.wizard') }}" class="btn btn-primary">Nieuw bericht</a>
     </div>
 
     <div class="overflow-x-auto border border-base-300 rounded-box bg-base-100">

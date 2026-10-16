@@ -14,7 +14,10 @@ class AccountNoticeController extends Controller
 {
     public function index(): View
     {
-        $notices = MemorialNotice::query()->latest('created_at')->get();
+        $notices = MemorialNotice::query()
+            ->when(! auth()->user()->isAdmin(), fn ($query) => $query->whereBelongsTo(auth()->user()))
+            ->latest('created_at')
+            ->get();
 
         return view('account.notices.index', [
             'notices' => $notices,
@@ -47,6 +50,8 @@ class AccountNoticeController extends Controller
 
     public function edit(MemorialNotice $notice): View
     {
+        $this->authorizeNotice($notice);
+
         return view('account.notices.edit', [
             'notice' => $notice,
         ]);
@@ -54,6 +59,8 @@ class AccountNoticeController extends Controller
 
     public function update(Request $request, MemorialNotice $notice): RedirectResponse
     {
+        $this->authorizeNotice($notice);
+
         $data = $this->validateNotice($request);
 
         if ($notice->title !== $data['title']) {
@@ -69,11 +76,20 @@ class AccountNoticeController extends Controller
 
     public function destroy(MemorialNotice $notice): RedirectResponse
     {
+        $this->authorizeNotice($notice);
+
         $notice->delete();
 
         return redirect()
             ->route('account.notices.index')
             ->with('status', 'Bericht verwijderd.');
+    }
+
+    private function authorizeNotice(MemorialNotice $notice): void
+    {
+        $user = auth()->user();
+
+        abort_unless($user->isAdmin() || $notice->user_id === $user->id, 403);
     }
 
     private function validateNotice(Request $request): array

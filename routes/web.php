@@ -35,9 +35,15 @@ Route::middleware('auth')->group(function (): void {
     Route::middleware('admin')->group(function (): void {
         Route::get('/account', [DashboardController::class, 'index'])->name('account.dashboard');
         Route::resource('/account/berichten', AccountNoticeController::class)
-            ->parameters(['berichten' => 'notice'])
+            ->only(['create', 'store'])
             ->names('account.notices');
     });
+
+    // Eigen berichten beheren; admins mogen alle berichten beheren (zie AccountNoticeController).
+    Route::resource('/account/berichten', AccountNoticeController::class)
+        ->except(['create', 'store'])
+        ->parameters(['berichten' => 'notice'])
+        ->names('account.notices');
 
     Route::post('/uitloggen', [AuthController::class, 'logout'])->name('logout');
 });

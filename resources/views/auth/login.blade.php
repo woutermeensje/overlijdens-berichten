@@ -1,13 +1,13 @@
 @extends('layouts.public')
 
-@section('title', 'Inloggen beheer')
-@section('meta_description', 'Inloggen in de beheeromgeving.')
+@section('title', 'Inloggen')
+@section('meta_description', 'Log in om uw berichten te beheren.')
 @section('meta_robots', 'noindex,nofollow')
 
 @section('content')
     <section class="card bg-base-100 border border-base-300 max-w-xl mx-auto">
         <div class="card-body">
-            <h1 class="card-title text-2xl">Inloggen beheer</h1>
+            <h1 class="card-title text-2xl">Inloggen</h1>
 
             <form method="post" action="{{ route('login.attempt') }}" class="space-y-4">
                 @csrf
