@@ -40,6 +40,8 @@ Route::middleware('auth')->group(function (): void {
     });
 
     // Eigen berichten beheren; admins mogen alle berichten beheren (zie AccountNoticeController).
+    Route::patch('/account/berichten/{notice}/status', [AccountNoticeController::class, 'toggleStatus'])
+        ->name('account.notices.status');
     Route::resource('/account/berichten', AccountNoticeController::class)
         ->except(['create', 'store'])
         ->parameters(['berichten' => 'notice'])

@@ -131,6 +131,8 @@
                         <li><a href="{{ route('notice.wizard') }}"><i class="ph ph-note-pencil"></i> Bericht plaatsen</a></li>
                         @auth
                             <li><a href="{{ auth()->user()->isAdmin() ? route('account.dashboard') : route('account.notices.index') }}"><i class="ph ph-house"></i> Account</a></li>
+                        @else
+                            <li><a href="{{ route('login') }}"><i class="ph ph-sign-in"></i> Inloggen</a></li>
                         @endauth
                     </ul>
                 </div>
@@ -144,6 +146,7 @@
                 </ul>
             </div>
             <div class="navbar-end gap-2">
+                <span class="hidden lg:block h-6 w-px bg-base-300 mx-2" aria-hidden="true"></span>
                 @auth
                     <a href="{{ auth()->user()->isAdmin() ? route('account.dashboard') : route('account.notices.index') }}" class="btn btn-ghost btn-sm"><i class="ph ph-house"></i> Account</a>
                     <form method="post" action="{{ route('logout') }}">
@@ -151,6 +154,7 @@
                         <button type="submit" class="btn btn-outline btn-sm"><i class="ph ph-sign-out"></i> <span class="hidden sm:inline">Uitloggen</span></button>
                     </form>
                 @else
+                    <a href="{{ route('login') }}" class="btn btn-ghost btn-sm"><i class="ph ph-sign-in"></i> <span class="hidden sm:inline">Inloggen</span></a>
                     <a href="{{ route('notice.wizard') }}" class="btn btn-primary btn-sm"><i class="ph ph-note-pencil"></i> <span class="hidden sm:inline">Bericht plaatsen</span></a>
                 @endauth
             </div>

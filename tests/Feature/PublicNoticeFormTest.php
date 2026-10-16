@@ -253,6 +253,42 @@ class PublicNoticeFormTest extends TestCase
             ->assertSee('06-12345678');
     }
 
+    public function test_owner_can_take_notice_offline_and_back_online(): void
+    {
+        $this->post(route('notice.wizard.submit'), $this->validPayload([
+            'create_account' => '1',
+            'password' => 'geheim-wachtwoord',
+            'password_confirmation' => 'geheim-wachtwoord',
+        ]));
+        $notice = MemorialNotice::query()->sole();
+
+        $this->patch(route('account.notices.status', $notice))->assertSessionHas('status', 'Bericht is offline gehaald.');
+        $this->assertSame('offline', $notice->fresh()->status);
+        $this->get(route('notice.show', $notice->slug))->assertNotFound();
+        $this->get(route('home'))->assertDontSee('Maria de Vries');
+
+        $this->patch(route('account.notices.status', $notice));
+        $this->assertSame('published', $notice->fresh()->status);
+        $this->get(route('notice.show', $notice->slug))->assertOk();
+    }
+
+    public function test_users_cannot_take_notices_of_others_offline(): void
+    {
+        $this->post(route('notice.wizard.submit'), $this->validPayload());
+        $notice = MemorialNotice::query()->sole();
+
+        $this->actingAs(User::factory()->create())
+            ->patch(route('account.notices.status', $notice))
+            ->assertForbidden();
+
+        $this->assertSame('published', $notice->fresh()->status);
+    }
+
+    public function test_header_shows_login_button_for_guests(): void
+    {
+        $this->get(route('home'))->assertSee(route('login'), false)->assertSee('Inloggen');
+    }
+
     /**
      * @param  array<string, mixed>  $overrides
      * @return array<string, mixed>

@@ -74,6 +74,19 @@ class AccountNoticeController extends Controller
             ->with('status', 'Bericht bijgewerkt.');
     }
 
+    public function toggleStatus(MemorialNotice $notice): RedirectResponse
+    {
+        $this->authorizeNotice($notice);
+
+        $goesOnline = $notice->status !== 'published';
+        $notice->update([
+            'status' => $goesOnline ? 'published' : 'offline',
+            'published_at' => $goesOnline ? ($notice->published_at ?? now()) : $notice->published_at,
+        ]);
+
+        return back()->with('status', $goesOnline ? 'Bericht staat weer online.' : 'Bericht is offline gehaald.');
+    }
+
     public function destroy(MemorialNotice $notice): RedirectResponse
     {
         $this->authorizeNotice($notice);

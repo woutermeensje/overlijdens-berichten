@@ -17,6 +17,7 @@
                     @if(auth()->user()->isAdmin())
                         <th>Geplaatst door</th>
                     @endif
+                    <th>Status</th>
                     <th>Datum</th>
                     <th class="text-right">Acties</th>
                 </tr>
@@ -36,10 +37,25 @@
                                 @endif
                             </td>
                         @endif
+                        <td>
+                            @if($notice->status === 'published')
+                                <span class="badge badge-success badge-soft">Online</span>
+                            @else
+                                <span class="badge">Offline</span>
+                            @endif
+                        </td>
                         <td>{{ $notice->created_at->format('d-m-Y H:i') }}</td>
                         <td>
                             <div class="flex justify-end gap-2">
+                                @if($notice->status === 'published')
+                                    <a href="{{ route('notice.show', $notice->slug) }}" class="btn btn-sm btn-ghost" target="_blank" rel="noopener">Bekijk</a>
+                                @endif
                                 <a href="{{ route('account.notices.edit', $notice) }}" class="btn btn-sm">Bewerk</a>
+                                <form method="post" action="{{ route('account.notices.status', $notice) }}">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" class="btn btn-sm btn-outline">{{ $notice->status === 'published' ? 'Offline halen' : 'Online zetten' }}</button>
+                                </form>
                                 <form method="post" action="{{ route('account.notices.destroy', $notice) }}" onsubmit="return confirm('Weet je zeker dat je dit bericht wilt verwijderen?');">
                                     @csrf
                                     @method('DELETE')
@@ -49,7 +65,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="{{ auth()->user()->isAdmin() ? 5 : 4 }}">Je hebt nog geen berichten geplaatst.</td></tr>
+                    <tr><td colspan="{{ auth()->user()->isAdmin() ? 6 : 5 }}">Je hebt nog geen berichten geplaatst.</td></tr>
                 @endforelse
             </tbody>
         </table>
