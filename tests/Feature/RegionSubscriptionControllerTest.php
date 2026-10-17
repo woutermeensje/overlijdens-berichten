@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Http\Controllers\RegionSubscriptionController;
+use App\Support\FormTimer;
 use App\Mail\AdminNewSubscriptionMail;
 use App\Mail\SubscriptionConfirmationMail;
 use App\Models\RegionSubscription;
@@ -45,7 +45,7 @@ class RegionSubscriptionControllerTest extends TestCase
     /** Een formulier dat even geleden geopend is, zoals bij een echte bezoeker. */
     private function subscribe(array $data)
     {
-        $token = RegionSubscriptionController::formToken();
+        $token = FormTimer::token();
         $this->travel(10)->seconds();
 
         return $this->post(route('newsletter.subscribe'), $data + ['form_token' => $token]);
@@ -105,7 +105,7 @@ class RegionSubscriptionControllerTest extends TestCase
     {
         $this->post(route('newsletter.subscribe'), [
             'email' => 'bot@example.com',
-            'form_token' => RegionSubscriptionController::formToken(),
+            'form_token' => FormTimer::token(),
         ])->assertSessionMissing('newsletter_success');
 
         $this->assertSame(0, RegionSubscription::count());

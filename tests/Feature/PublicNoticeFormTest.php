@@ -393,6 +393,17 @@ class PublicNoticeFormTest extends TestCase
             ->assertSee('value="'.MemorialNotice::FEATURED_OPTION.'"', false);
     }
 
+    public function test_contact_page_shows_contact_details_and_is_in_the_menu(): void
+    {
+        $this->get(route('contact'))
+            ->assertOk()
+            ->assertSee('contact@overlijdens-berichten.nl')
+            ->assertSee('085 239 2040')
+            ->assertSee('tel:+31852392040', false);
+
+        $this->get(route('home'))->assertSee(route('contact'), false);
+    }
+
     private function validPayload(array $overrides = []): array
     {
         return array_merge([

@@ -6,7 +6,6 @@
 @php
     $featuredPrice = \App\Models\MemorialNotice::FEATURED_PRICE_EXCL_VAT;
     $money = fn (float $amount): string => '€ '.number_format($amount, 2, ',', '.');
-    $contactEmail = config('app.admin_email');
 
     $packages = [
         [
@@ -56,7 +55,7 @@
                 'Eén maandfactuur en een vast aanspreekpunt',
             ],
             'cta' => 'Neem contact op',
-            'href' => 'mailto:'.$contactEmail.'?subject='.rawurlencode('Pakket uitvaartondernemer'),
+            'href' => route('contact', ['onderwerp' => 'uitvaartondernemer']).'#contactformulier',
             'highlight' => false,
         ],
     ];

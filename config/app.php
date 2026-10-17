@@ -17,6 +17,10 @@ return [
 
     'admin_email' => env('ADMIN_EMAIL', 'contact@overlijdens-berichten.nl'),
 
+    // Publieke contactgegevens (contactpagina).
+    'contact_email' => env('CONTACT_EMAIL', 'contact@overlijdens-berichten.nl'),
+    'contact_phone' => env('CONTACT_PHONE', '085 239 2040'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment

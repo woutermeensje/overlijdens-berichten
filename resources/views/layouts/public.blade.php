@@ -128,24 +128,24 @@
             <div class="navbar-center">
                 <div class="lg:hidden">@include('partials.logo', ['iconOnly' => true, 'iconClass' => 'h-8 w-8'])</div>
                 <ul class="menu menu-horizontal px-1 gap-1 hidden lg:flex">
-                    <li><a href="{{ route('options') }}"><i class="ph ph-list-checks"></i> Opties</a></li>
-                    <li><a href="{{ route('cities.index') }}"><i class="ph ph-map-pin-area"></i> Steden</a></li>
-                    <li><a href="{{ route('notice.wizard') }}"><i class="ph ph-note-pencil"></i> Bericht plaatsen</a></li>
+                    <li><a href="{{ route('options') }}">Opties</a></li>
+                    <li><a href="{{ route('cities.index') }}">Steden</a></li>
+                    <li><a href="{{ route('contact') }}">Contact</a></li>
                 </ul>
             </div>
             <div class="navbar-end gap-2">
                 <div class="hidden lg:flex items-center gap-2">
-                    <span class="h-6 w-px bg-base-300 mx-2" aria-hidden="true"></span>
+                    <span class="h-7 w-0.5 rounded-full bg-base-300 mx-2" aria-hidden="true"></span>
                     @auth
-                        <a href="{{ auth()->user()->isAdmin() ? route('account.dashboard') : route('account.notices.index') }}" class="btn btn-ghost text-base"><i class="ph ph-house"></i> Account</a>
+                        <a href="{{ auth()->user()->isAdmin() ? route('account.dashboard') : route('account.notices.index') }}" class="btn btn-ghost text-base">Account</a>
                         <form method="post" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit" class="btn btn-outline text-base"><i class="ph ph-sign-out"></i> Uitloggen</button>
+                            <button type="submit" class="btn btn-outline text-base">Uitloggen</button>
                         </form>
                     @else
-                        <a href="{{ route('login') }}" class="btn btn-ghost text-base"><i class="ph ph-sign-in"></i> Inloggen</a>
-                        <a href="{{ route('notice.wizard') }}" class="btn btn-primary text-base"><i class="ph ph-note-pencil"></i> Bericht plaatsen</a>
+                        <a href="{{ route('login') }}" class="btn btn-ghost text-base">Inloggen</a>
                     @endauth
+                    <a href="{{ route('notice.wizard') }}" class="btn btn-primary text-base"><i class="ph ph-note-pencil"></i> Bericht plaatsen</a>
                 </div>
                 <button type="button" class="btn btn-ghost btn-square btn-lg lg:hidden" aria-label="Menu openen" aria-controls="mobile-menu" aria-expanded="false" data-mobile-menu-open>
                     <i class="ph ph-list text-4xl" aria-hidden="true"></i>
@@ -166,13 +166,14 @@
                 </button>
             </div>
             <ul class="menu menu-lg w-full p-4 gap-1 text-lg">
-                <li><a href="{{ route('home') }}"><i class="ph ph-house-simple"></i> Overlijdensberichten</a></li>
-                <li><a href="{{ route('options') }}"><i class="ph ph-list-checks"></i> Opties</a></li>
-                <li><a href="{{ route('cities.index') }}"><i class="ph ph-map-pin-area"></i> Steden</a></li>
+                <li><a href="{{ route('home') }}">Overlijdensberichten</a></li>
+                <li><a href="{{ route('options') }}">Opties</a></li>
+                <li><a href="{{ route('cities.index') }}">Steden</a></li>
+                <li><a href="{{ route('contact') }}">Contact</a></li>
                 @auth
-                    <li><a href="{{ auth()->user()->isAdmin() ? route('account.dashboard') : route('account.notices.index') }}"><i class="ph ph-house"></i> Account</a></li>
+                    <li><a href="{{ auth()->user()->isAdmin() ? route('account.dashboard') : route('account.notices.index') }}">Account</a></li>
                 @else
-                    <li><a href="{{ route('login') }}"><i class="ph ph-sign-in"></i> Inloggen</a></li>
+                    <li><a href="{{ route('login') }}">Inloggen</a></li>
                 @endauth
             </ul>
             <div class="mt-auto p-4 space-y-2 border-t border-base-300">
@@ -180,7 +181,7 @@
                 @auth
                     <form method="post" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" class="btn btn-outline btn-lg w-full"><i class="ph ph-sign-out"></i> Uitloggen</button>
+                        <button type="submit" class="btn btn-outline btn-lg w-full">Uitloggen</button>
                     </form>
                 @endauth
             </div>

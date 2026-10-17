@@ -46,7 +46,7 @@
 
             <form method="POST" action="{{ route('newsletter.subscribe') }}" class="flex flex-col lg:flex-row lg:items-start gap-2" data-area-form>
                 @csrf
-                <input type="hidden" name="form_token" value="{{ \App\Http\Controllers\RegionSubscriptionController::formToken() }}">
+                {!! \App\Support\FormTimer::field() !!}
                 <div style="display:none;position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">
                     <label for="hp_website_{{ $honeypotId }}">Website</label>
                     <input type="text" id="hp_website_{{ $honeypotId }}" name="website" value="" tabindex="-1" autocomplete="off">

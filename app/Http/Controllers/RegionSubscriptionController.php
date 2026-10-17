@@ -7,9 +7,8 @@ use App\Mail\SubscriptionConfirmationMail;
 use App\Models\RegionSubscription;
 use App\Models\User;
 use App\Services\Geocoder;
-use Illuminate\Contracts\Encryption\DecryptException;
+use App\Support\FormTimer;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -17,32 +16,15 @@ use Throwable;
 
 class RegionSubscriptionController extends Controller
 {
-    /** Mensen hebben minimaal zoveel seconden nodig om het formulier in te vullen; bots niet. */
-    private const MIN_FILL_SECONDS = 3;
-
-    private const MAX_FORM_AGE_SECONDS = 6 * 60 * 60;
-
     private const MAX_AREAS = 10;
-
-    /** Tijdstempel voor het formulier, zodat direct geposte of razendsnelle inzendingen herkend worden. */
-    public static function formToken(): string
-    {
-        return Crypt::encryptString((string) now()->timestamp);
-    }
 
     public function store(Request $request, Geocoder $geocoder)
     {
-        try {
-            $age = now()->timestamp - (int) Crypt::decryptString((string) $request->input('form_token'));
-        } catch (DecryptException) {
+        $timer = FormTimer::check($request);
+        if ($timer === 'bot') {
             return back();
         }
-
-        if ($age < self::MIN_FILL_SECONDS) {
-            return back();
-        }
-
-        if ($age > self::MAX_FORM_AGE_SECONDS) {
+        if ($timer === 'expired') {
             return back()->withInput()->with('newsletter_error', 'Het formulier is verlopen. Probeer het opnieuw.');
         }
 
