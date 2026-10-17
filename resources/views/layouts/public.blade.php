@@ -116,6 +116,11 @@
             color: #4a2f2f;
         }
     </style>
+
+    @production
+        <!-- 100% privacy-first analytics -->
+        <script async src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
+    @endproduction
 </head>
 <body class="min-h-screen bg-base-200 text-base-content flex flex-col">
     <header class="sticky top-0 z-30 bg-base-100 border-b border-base-300">
