@@ -121,8 +121,8 @@
     <header class="bg-base-100 border-b border-base-300">
         <div class="navbar max-w-6xl w-full mx-auto px-4 min-h-16">
             <div class="navbar-start">
-                {{-- Mobiel: lege ruimte zodat het kruis precies in het midden staat. --}}
-                <span class="w-12 lg:hidden" aria-hidden="true"></span>
+                {{-- Mobiel: knop Bericht plaatsen linksboven; navbar-start en -end zijn even breed, dus het kruis blijft in het midden. --}}
+                <a href="{{ route('notice.wizard') }}" class="btn btn-primary btn-sm !font-semibold px-3 lg:!hidden"><i class="ph ph-note-pencil"></i> Bericht plaatsen</a>
                 <div class="hidden lg:block">@include('partials.logo')</div>
             </div>
             <div class="navbar-center">
@@ -137,15 +137,15 @@
                 <div class="hidden lg:flex items-center gap-2">
                     <span class="h-7 w-0.5 rounded-full bg-base-300 mx-2" aria-hidden="true"></span>
                     @auth
-                        <a href="{{ auth()->user()->isAdmin() ? route('account.dashboard') : route('account.notices.index') }}" class="btn btn-ghost text-base">Account</a>
+                        <a href="{{ auth()->user()->isAdmin() ? route('account.dashboard') : route('account.notices.index') }}" class="btn btn-ghost text-base !font-semibold">Account</a>
                         <form method="post" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit" class="btn btn-outline text-base">Uitloggen</button>
+                            <button type="submit" class="btn btn-outline text-base !font-semibold">Uitloggen</button>
                         </form>
                     @else
-                        <a href="{{ route('login') }}" class="btn btn-ghost text-base">Inloggen</a>
+                        <a href="{{ route('login') }}" class="btn btn-ghost text-base !font-semibold">Inloggen</a>
                     @endauth
-                    <a href="{{ route('notice.wizard') }}" class="btn btn-primary text-base"><i class="ph ph-note-pencil"></i> Bericht plaatsen</a>
+                    <a href="{{ route('notice.wizard') }}" class="btn btn-primary text-base !font-semibold"><i class="ph ph-note-pencil"></i> Bericht plaatsen</a>
                 </div>
                 <button type="button" class="btn btn-ghost btn-square btn-lg lg:hidden" aria-label="Menu openen" aria-controls="mobile-menu" aria-expanded="false" data-mobile-menu-open>
                     <i class="ph ph-list text-4xl" aria-hidden="true"></i>
