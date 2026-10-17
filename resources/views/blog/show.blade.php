@@ -1,7 +1,7 @@
 @extends('layouts.public')
 
 @section('title', $post->title)
-@section('meta_description', $post->meta_description ?: \Illuminate\Support\Str::limit(strip_tags($post->content_html), 155, '...'))
+@section('meta_description', \Illuminate\Support\Str::limit(\Illuminate\Support\Str::squish(html_entity_decode(strip_tags($post->meta_description ?: $post->content_html))), 155, '…'))
 @section('og_type', 'article')
 
 @section('structured_data')

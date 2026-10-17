@@ -21,11 +21,6 @@ class HomeController extends Controller
         ]);
     }
 
-    public function placeNotice()
-    {
-        return view('pages.place-notice');
-    }
-
     public function showNotice(string $slug)
     {
         $notice = MemorialNotice::query()

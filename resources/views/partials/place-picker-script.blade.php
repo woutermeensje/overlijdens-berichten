@@ -7,6 +7,7 @@
         <ul data-place-list></ul>                    suggestielijst
         <p data-place-error class="hidden">…</p>     melding als er geen plaats uit de lijst is gekozen
         <p data-place-details></p>                   optioneel: toont "Provincie · Nederland" na een keuze
+        <input data-place-province readonly>          optioneel: krijgt de provincie van de gekozen plaats
       </div>
     Later toegevoegde kiezers activeer je met window.initPlacePicker(element).
     Een uitgeschakeld (disabled) of verwijderd veld wordt bij verzenden niet gecontroleerd.
@@ -28,6 +29,7 @@
                 const list = picker.querySelector('[data-place-list]');
                 const error = picker.querySelector('[data-place-error]');
                 const details = picker.querySelector('[data-place-details]');
+                const provinceField = picker.closest('form')?.querySelector('[data-place-province]');
                 let places = [];
                 let active = -1;
                 let timer = null;
@@ -35,6 +37,7 @@
                 let confirmedLabel = hiddenId.value ? input.value : null;
 
                 const showDetails = (province) => {
+                    if (provinceField) provinceField.value = province ?? '';
                     if (!details) return;
                     details.textContent = province ? `${province} · Nederland` : '';
                     details.classList.toggle('hidden', !province);

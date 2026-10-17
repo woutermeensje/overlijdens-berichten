@@ -6,8 +6,10 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\CityLandingController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\CrematoriumController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PublicNoticeWizardController;
 use App\Http\Controllers\RegionSubscriptionController;
@@ -17,10 +19,13 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
-Route::get('/overlijdensbericht-plaatsen', [HomeController::class, 'placeNotice'])->name('notice.place');
+Route::permanentRedirect('/overlijdensbericht-plaatsen', '/bericht-plaatsen');
 Route::view('/opties', 'pages.options')->name('options');
 Route::get('/contact', [ContactController::class, 'show'])->name('contact');
 Route::post('/contact', [ContactController::class, 'send'])->name('contact.send')->middleware(['throttle:5,1', 'honeypot']);
+Route::get('/organisaties', [OrganizationController::class, 'index'])->name('organizations.index');
+Route::get('/organisatie-toevoegen', [OrganizationController::class, 'create'])->name('organizations.create');
+Route::post('/organisatie-toevoegen', [OrganizationController::class, 'store'])->name('organizations.store')->middleware(['throttle:5,1', 'honeypot:website_hp']);
 Route::get('/overlijdensbericht/{slug}', [HomeController::class, 'showNotice'])->name('notice.show');
 Route::post('/overlijdensbericht/{slug}/condoleances', [HomeController::class, 'storeCondolence'])->name('notice.condolences.store')->middleware(['throttle:6,1', 'honeypot']);
 Route::get('/bericht-plaatsen', [PublicNoticeWizardController::class, 'show'])->name('notice.wizard');
@@ -56,9 +61,14 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/uitloggen', [AuthController::class, 'logout'])->name('logout');
 });
 
-Route::get('/{city}/crematorium', [CityLandingController::class, 'crematorium'])
+Route::get('/crematorium', [CrematoriumController::class, 'index'])->name('crematoria.index');
+Route::get('/crematorium/{city}', [CrematoriumController::class, 'city'])
     ->where('city', '[A-Za-z0-9\-]+')
     ->name('city.crematorium');
+
+// Oude structuur /{stad}/crematorium blijft werken via een permanente doorverwijzing.
+Route::get('/{city}/crematorium', fn (string $city) => redirect()->route('city.crematorium', ['city' => $city], 301))
+    ->where('city', '[A-Za-z0-9\-]+');
 
 Route::get('/{city}', [CityLandingController::class, 'city'])
     ->where('city', '[A-Za-z0-9\-]+')
