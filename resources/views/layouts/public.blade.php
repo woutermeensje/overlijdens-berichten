@@ -118,7 +118,7 @@
     </style>
 </head>
 <body class="min-h-screen bg-base-200 text-base-content flex flex-col">
-    <header class="bg-base-100 border-b border-base-300">
+    <header class="sticky top-0 z-30 bg-base-100 border-b border-base-300">
         <div class="navbar max-w-6xl w-full mx-auto px-4 min-h-16">
             <div class="navbar-start">
                 {{-- Mobiel: knop Bericht plaatsen linksboven; navbar-start en -end zijn even breed, dus het kruis blijft in het midden. --}}

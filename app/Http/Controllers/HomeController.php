@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\MemorialNotice;
+use App\Models\MemorialNoticeView;
 use App\Services\Geocoder;
 use App\Support\NoticeSearch;
 use App\Support\NoticeContentSanitizer;
@@ -21,13 +22,15 @@ class HomeController extends Controller
         ]);
     }
 
-    public function showNotice(string $slug)
+    public function showNotice(Request $request, string $slug)
     {
         $notice = MemorialNotice::query()
             ->published()
             ->with(['condolences' => fn ($query) => $query->oldest('created_at')->oldest('id')])
             ->where('slug', $slug)
             ->firstOrFail();
+
+        MemorialNoticeView::record($notice, $request);
 
         return view('notices.show', [
             'notice' => $notice,

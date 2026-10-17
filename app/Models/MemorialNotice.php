@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class MemorialNotice extends Model
 {
@@ -82,6 +83,25 @@ class MemorialNotice extends Model
     /**
      * @return array<string, string>
      */
+    /**
+     * Korte samenvatting voor in de berichtenlijst: de eerste 12 woorden van de berichttekst,
+     * of een vaste zin als er geen tekst is.
+     */
+    public function listExcerpt(int $words = 12): string
+    {
+        $text = Str::squish(html_entity_decode(strip_tags(str_replace(['<br>', '<br/>', '<br />', '</p>'], ' ', (string) $this->content))));
+
+        if ($text !== '') {
+            return Str::words($text, $words, '…');
+        }
+
+        $type = Str::lower(self::typeLabels()[$this->type] ?? 'bericht');
+        $article = $this->type === self::TYPE_ROUWADVERTENTIE ? 'de' : 'het';
+        $name = trim(($this->deceased_first_name ?? '').' '.($this->deceased_last_name ?? '')) ?: $this->title;
+
+        return 'Bekijk '.$article.' '.$type.' van '.$name.'.';
+    }
+
     public static function typeLabels(): array
     {
         return [
@@ -111,6 +131,11 @@ class MemorialNotice extends Model
     public function condolences(): HasMany
     {
         return $this->hasMany(MemorialNoticeCondolence::class);
+    }
+
+    public function views(): HasMany
+    {
+        return $this->hasMany(MemorialNoticeView::class);
     }
 
     public function scopePublished($query)

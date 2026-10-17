@@ -39,7 +39,7 @@ class MemorialNoticeCondolenceTest extends TestCase
             ->assertDontSee('piet@example.com');
     }
 
-    public function test_notice_page_shows_funeral_information_and_condolence_register_link(): void
+    public function test_notice_page_hides_funeral_information_and_shows_condolence_register_link(): void
     {
         $notice = $this->createNotice([
             'funeral_company_name' => 'Uitvaartzorg De Haven',
@@ -52,10 +52,8 @@ class MemorialNoticeCondolenceTest extends TestCase
 
         $this->get(route('notice.show', $notice->slug))
             ->assertOk()
-            ->assertSee('Informatie over de uitvaart')
-            ->assertSee('Uitvaartzorg De Haven')
-            ->assertSee('Anne de Boer')
-            ->assertSee('010-1234567')
+            ->assertDontSee('Informatie over de uitvaart')
+            ->assertDontSee('Uitvaartzorg De Haven')
             ->assertSee('Naar condoleanceregister')
             ->assertSee('https://register.test/willem');
     }
