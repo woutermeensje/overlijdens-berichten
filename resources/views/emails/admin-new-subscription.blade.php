@@ -27,15 +27,19 @@
             <table>
                 <tr>
                     <td>E-mailadres</td>
-                    <td>{{ $subscription->email }}</td>
+                    <td>{{ $subscriptions->first()->email }}</td>
                 </tr>
                 <tr>
-                    <td>Regio / stad</td>
-                    <td>{{ $subscription->region ?: 'Heel Nederland' }}</td>
+                    <td>{{ $subscriptions->count() === 1 ? 'Gebied' : 'Gebieden' }}</td>
+                    <td>
+                        @foreach($subscriptions as $subscription)
+                            {{ ucfirst($subscription->areaLabel()) }}@if(! $loop->last)<br>@endif
+                        @endforeach
+                    </td>
                 </tr>
                 <tr>
                     <td>Aangemeld op</td>
-                    <td>{{ $subscription->created_at->format('d-m-Y \o\m H:i') }}</td>
+                    <td>{{ $subscriptions->first()->created_at->timezone('Europe/Amsterdam')->format('d-m-Y \o\m H:i') }}</td>
                 </tr>
             </table>
         </div>

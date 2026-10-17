@@ -32,14 +32,19 @@
         <div class="stat">
             <div class="stat-title">Heel Nederland</div>
             <div class="stat-value">{{ $nationwide }}</div>
-            <div class="stat-desc">Aanmeldingen zonder plaats</div>
+            <div class="stat-desc">Aanmeldingen zonder stad of provincie</div>
+        </div>
+        <div class="stat">
+            <div class="stat-title">Hele provincie</div>
+            <div class="stat-value">{{ $provinceWide }}</div>
+            <div class="stat-desc">Aanmeldingen voor een provincie</div>
         </div>
     </div>
 
     <section class="border border-base-300 rounded-box bg-base-100 p-4 md:p-6 mb-6">
         <h2 class="text-lg font-semibold">Aanmeldingen per provincie</h2>
         <p class="text-sm text-base-content/70 mb-4">
-            Op basis van de gekozen plaats.
+            Aanmeldingen voor een stad tellen mee bij de provincie van die stad, aanmeldingen voor een hele provincie bij die provincie.
             @if($withoutProvince > 0)
                 {{ $withoutProvince }} {{ $withoutProvince === 1 ? 'aanmelding heeft' : 'aanmeldingen hebben' }} een plaats die niet te herleiden is en {{ $withoutProvince === 1 ? 'telt' : 'tellen' }} niet mee.
             @endif
@@ -104,7 +109,7 @@
             <thead>
                 <tr>
                     <th>E-mailadres</th>
-                    <th>Plaats</th>
+                    <th>Gebied</th>
                     <th>Provincie</th>
                     <th>Aangemeld op</th>
                 </tr>
@@ -113,7 +118,7 @@
                 @forelse($subscriptions as $subscription)
                     <tr>
                         <td>{{ $subscription->email }}</td>
-                        <td>{{ $subscription->region ?? 'Heel Nederland' }}</td>
+                        <td>{{ $subscription->region ?? ($subscription->province ? 'Hele provincie' : 'Heel Nederland') }}</td>
                         <td>{{ $subscription->province ?? '—' }}</td>
                         <td class="whitespace-nowrap">{{ $subscription->created_at?->timezone('Europe/Amsterdam')->format('d-m-Y H:i') }}</td>
                     </tr>

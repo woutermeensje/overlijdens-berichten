@@ -8,7 +8,6 @@
 @section('content')
     @include('partials.newsletter-alert-card', [
         'region' => $cityName,
-        'regionPlaceholder' => 'Stad of plaats',
     ])
 
     <div class="max-w-[1080px] mx-auto mt-14 flex flex-col lg:flex-row lg:items-start gap-4">

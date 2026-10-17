@@ -28,28 +28,21 @@
             <p>Bedankt voor uw aanmelding. U ontvangt voortaan wekelijks een overzicht van de nieuwste overlijdensberichten.</p>
 
             <div class="highlight">
-                @if($subscription->region)
-                    Regio: {{ $subscription->region }}
-                @else
-                    Heel Nederland
-                @endif
+                @foreach($subscriptions as $subscription)
+                    {{ ucfirst($subscription->areaLabel()) }}@if(! $loop->last)<br>@endif
+                @endforeach
             </div>
 
-            <p>Elke week sturen wij u een e-mail met de meest recente overlijdensberichten
-                @if($subscription->region)
-                    in en rondom <strong>{{ $subscription->region }}</strong>.
-                @else
-                    uit heel <strong>Nederland</strong>.
-                @endif
-            </p>
+            <p>Elke week sturen wij u een e-mail met de meest recente overlijdensberichten uit {{ $subscriptions->count() === 1 ? 'dit gebied' : 'deze gebieden' }}.</p>
 
-            <p>Wilt u zich op een later moment afmelden? Dat kan eenvoudig via de knop hieronder.</p>
+            <p>Wilt u zich op een later moment afmelden? Dat kan per gebied:</p>
 
-            <a href="{{ route('newsletter.unsubscribe', $subscription->token) }}" class="btn">Afmelden</a>
+            @foreach($subscriptions as $subscription)
+                <p><a href="{{ route('newsletter.unsubscribe', $subscription->token) }}" class="btn">Afmelden voor {{ $subscription->areaLabel() }}</a></p>
+            @endforeach
         </div>
         <div class="footer">
             <p>U ontvangt deze e-mail omdat u zich heeft aangemeld op <a href="{{ url('/') }}">overlijdens-berichten.nl</a>.</p>
-            <p><a href="{{ route('newsletter.unsubscribe', $subscription->token) }}">Uitschrijven</a></p>
         </div>
     </div>
 </body>

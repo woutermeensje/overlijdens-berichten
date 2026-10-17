@@ -1,13 +1,15 @@
 @php
     $region = $region ?? null;
     $description = $description ?? 'Meld u aan en ontvang elke week een overzicht van nieuwe berichten in uw mailbox.';
-    $regionPlaceholder = $regionPlaceholder ?? 'Stad of plaats (optioneel)';
     // Alleen als hoofdkop gebruiken op pagina's die zelf geen h1 hebben.
     $brandHeading = ($brandAsHeading ?? false) ? 'h1' : 'span';
     $honeypotId = \Illuminate\Support\Str::slug($region ?: 'landelijk');
     $prefilledPlace = $region ? app(\App\Services\Geocoder::class)->findPlace($region) : null;
-    $regionValue = old('region', $prefilledPlace ? $region : '');
-    $regionIdValue = old('region_id', $prefilledPlace['id'] ?? '');
+    $areaRows = array_values((array) old('areas', [
+        $prefilledPlace
+            ? ['type' => 'city', 'name' => $prefilledPlace['name'], 'id' => $prefilledPlace['id']]
+            : ['type' => 'city', 'name' => '', 'id' => ''],
+    ]));
 @endphp
 
 <div class="max-w-[1080px] mx-auto mb-6 h-6 flex items-center gap-2 text-sm text-base-content/70 min-w-0">
@@ -41,25 +43,93 @@
                 <p class="flex-1 min-w-0 font-semibold text-base">{{ $description }}</p>
             </div>
 
-            <form method="POST" action="{{ route('newsletter.subscribe') }}" class="flex flex-col sm:flex-row sm:items-start gap-2" data-place-form>
+            <form method="POST" action="{{ route('newsletter.subscribe') }}" class="flex flex-col lg:flex-row lg:items-start gap-2" data-area-form>
                 @csrf
                 <input type="hidden" name="form_token" value="{{ \App\Http\Controllers\RegionSubscriptionController::formToken() }}">
                 <div style="display:none;position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true">
                     <label for="hp_website_{{ $honeypotId }}">Website</label>
                     <input type="text" id="hp_website_{{ $honeypotId }}" name="website" value="" tabindex="-1" autocomplete="off">
                 </div>
-                <input type="email" name="email" value="{{ old('email') }}" required placeholder="uw@emailadres.nl" class="input input-bordered w-full sm:flex-1 px-3" />
-                <div class="relative w-full sm:flex-1" data-place-picker>
-                    <input type="text" name="region" value="{{ $regionValue }}" placeholder="{{ $regionPlaceholder }}" class="input input-bordered w-full px-3"
-                           autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="place_list_{{ $honeypotId }}" data-place-input />
-                    <input type="hidden" name="region_id" value="{{ $regionIdValue }}" data-place-id>
-                    <ul id="place_list_{{ $honeypotId }}" role="listbox" class="hidden absolute z-30 left-0 right-0 mt-1 menu menu-sm bg-base-100 border border-base-300 rounded-box shadow-lg max-h-72 overflow-y-auto flex-nowrap" data-place-list></ul>
-                    <p class="hidden text-error text-xs mt-1 px-1" data-place-error>Kies een plaats uit de lijst met suggesties.</p>
+                <input type="email" name="email" value="{{ old('email') }}" required placeholder="uw@emailadres.nl" aria-label="E-mailadres" class="input input-bordered w-full lg:w-72 lg:shrink-0 px-3" />
+
+                <div class="flex-1 min-w-0 space-y-2">
+                    <div class="space-y-2" data-area-list>
+                        @foreach($areaRows as $index => $area)
+                            @include('partials.newsletter-area-row', ['index' => $index, 'area' => $area])
+                        @endforeach
+                    </div>
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <button type="button" class="btn btn-ghost btn-sm px-2" data-area-add>
+                            <i class="ph ph-plus-circle text-lg" aria-hidden="true"></i> Nog een stad of provincie
+                        </button>
+                        @unless($region)
+                            <span class="text-xs text-base-content/60">Laat leeg voor heel Nederland.</span>
+                        @endunless
+                    </div>
                 </div>
+
                 <button type="submit" class="btn btn-primary shrink-0">Alerts instellen</button>
+
+                <template data-area-template>
+                    @include('partials.newsletter-area-row', ['index' => '__INDEX__', 'area' => ['type' => 'city']])
+                </template>
             </form>
         </div>
     </div>
 </section>
 
 @include('partials.place-picker-script')
+
+@once
+    <script>
+        (() => {
+            const MAX_AREAS = 10;
+
+            document.querySelectorAll('[data-area-form]').forEach((form) => {
+                const list = form.querySelector('[data-area-list]');
+                const template = form.querySelector('[data-area-template]');
+                const addButton = form.querySelector('[data-area-add]');
+                let nextIndex = list.children.length;
+
+                const refresh = () => {
+                    const rows = list.querySelectorAll('[data-area-row]');
+                    rows.forEach((row) => row.querySelector('[data-area-remove]').classList.toggle('invisible', rows.length === 1));
+                    addButton.disabled = rows.length >= MAX_AREAS;
+                };
+
+                // Het invoerveld beweegt mee met de keuze: stad = plaatszoeker, provincie = keuzelijst.
+                const setType = (row, type) => {
+                    const city = row.querySelector('[data-area-city]');
+                    const province = row.querySelector('[data-area-province]');
+                    city.classList.toggle('hidden', type !== 'city');
+                    province.classList.toggle('hidden', type !== 'province');
+                    city.querySelectorAll('input').forEach((input) => input.disabled = type !== 'city');
+                    province.querySelector('select').disabled = type !== 'province';
+                    (type === 'city' ? city.querySelector('[data-place-input]') : province.querySelector('select')).focus();
+                };
+
+                const setup = (row) => {
+                    window.initPlacePicker(row.querySelector('[data-place-picker]'));
+                    row.querySelector('[data-area-type]').addEventListener('change', (event) => setType(row, event.target.value));
+                    row.querySelector('[data-area-remove]').addEventListener('click', () => {
+                        row.remove();
+                        refresh();
+                        list.querySelector('[data-area-row]:last-child [data-area-type]')?.focus();
+                    });
+                };
+
+                addButton.addEventListener('click', () => {
+                    const html = template.innerHTML.replaceAll('__INDEX__', String(nextIndex++));
+                    list.insertAdjacentHTML('beforeend', html);
+                    const row = list.lastElementChild;
+                    setup(row);
+                    refresh();
+                    row.querySelector('[data-area-type]').focus();
+                });
+
+                list.querySelectorAll('[data-area-row]').forEach(setup);
+                refresh();
+            });
+        })();
+    </script>
+@endonce

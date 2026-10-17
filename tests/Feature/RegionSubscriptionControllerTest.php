@@ -62,8 +62,7 @@ class RegionSubscriptionControllerTest extends TestCase
 
         $response = $this->subscribe([
             'email' => 'subscriber@example.com',
-            'region' => 'Amsterdam',
-            'region_id' => self::AMSTERDAM_ID,
+            'areas' => [['type' => 'city', 'name' => 'Amsterdam', 'id' => self::AMSTERDAM_ID]],
         ]);
 
         $response->assertRedirect();
@@ -84,10 +83,10 @@ class RegionSubscriptionControllerTest extends TestCase
 
     public function test_region_must_be_chosen_from_the_suggestions(): void
     {
-        $this->subscribe(['email' => 'subscriber@example.com', 'region' => 'egdurtwnpn'])
+        $this->subscribe(['email' => 'subscriber@example.com', 'areas' => [['type' => 'city', 'name' => 'egdurtwnpn']]])
             ->assertSessionHas('newsletter_error');
 
-        $this->subscribe(['email' => 'subscriber@example.com', 'region' => 'egdurtwnpn', 'region_id' => 'wpl-00000000000000000000000000000000'])
+        $this->subscribe(['email' => 'subscriber@example.com', 'areas' => [['type' => 'city', 'name' => 'egdurtwnpn', 'id' => 'wpl-00000000000000000000000000000000']]])
             ->assertSessionHas('newsletter_error');
 
         $this->assertSame(0, RegionSubscription::count());
@@ -110,5 +109,50 @@ class RegionSubscriptionControllerTest extends TestCase
         ])->assertSessionMissing('newsletter_success');
 
         $this->assertSame(0, RegionSubscription::count());
+    }
+
+    public function test_multiple_cities_and_provinces_in_one_go(): void
+    {
+        $this->subscribe([
+            'email' => 'subscriber@example.com',
+            'areas' => [
+                ['type' => 'city', 'name' => 'Amsterdam', 'id' => self::AMSTERDAM_ID],
+                ['type' => 'province', 'name' => 'Utrecht'],
+                ['type' => 'province', 'name' => 'Utrecht'],
+                ['type' => 'city', 'name' => ''],
+            ],
+        ])->assertSessionHas('newsletter_success', 'U bent aangemeld! U ontvangt wekelijks de laatste overlijdensberichten uit Amsterdam en provincie Utrecht.');
+
+        $this->assertDatabaseHas('region_subscriptions', ['email' => 'subscriber@example.com', 'region' => 'Amsterdam', 'province' => 'Noord-Holland']);
+        $this->assertDatabaseHas('region_subscriptions', ['email' => 'subscriber@example.com', 'region' => null, 'province' => 'Utrecht']);
+        $this->assertSame(2, RegionSubscription::count());
+
+        // Eén bevestigingsmail met een afmeldlink per gebied.
+        Mail::assertSent(SubscriptionConfirmationMail::class, 1);
+        Mail::assertSent(SubscriptionConfirmationMail::class, fn (SubscriptionConfirmationMail $mail): bool => $mail->subscriptions->count() === 2
+            && str_contains($mail->render(), 'Afmelden voor provincie Utrecht'));
+    }
+
+    public function test_province_must_be_one_of_the_twelve(): void
+    {
+        $this->subscribe(['email' => 'subscriber@example.com', 'areas' => [['type' => 'province', 'name' => 'Vlaanderen']]])
+            ->assertSessionHas('newsletter_error', 'Kies een provincie uit de lijst.');
+
+        $this->assertSame(0, RegionSubscription::count());
+    }
+
+    public function test_existing_areas_are_skipped(): void
+    {
+        $this->subscribe(['email' => 'subscriber@example.com', 'areas' => [['type' => 'province', 'name' => 'Utrecht']]]);
+
+        $this->subscribe(['email' => 'subscriber@example.com', 'areas' => [['type' => 'province', 'name' => 'Utrecht']]])
+            ->assertSessionHas('newsletter_error');
+
+        $this->subscribe(['email' => 'subscriber@example.com', 'areas' => [
+            ['type' => 'province', 'name' => 'Utrecht'],
+            ['type' => 'province', 'name' => 'Zeeland'],
+        ]])->assertSessionHas('newsletter_success');
+
+        $this->assertSame(2, RegionSubscription::count());
     }
 }

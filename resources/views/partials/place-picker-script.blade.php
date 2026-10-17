@@ -8,6 +8,8 @@
         <p data-place-error class="hidden">…</p>     melding als er geen plaats uit de lijst is gekozen
         <p data-place-details></p>                   optioneel: toont "Provincie · Nederland" na een keuze
       </div>
+    Later toegevoegde kiezers activeer je met window.initPlacePicker(element).
+    Een uitgeschakeld (disabled) of verwijderd veld wordt bij verzenden niet gecontroleerd.
 --}}
 @once
     <script>
@@ -16,7 +18,10 @@
 
             const escapeHtml = (value) => value.replace(/[&<>"']/g, (c) => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
 
-            document.querySelectorAll('[data-place-picker]').forEach((picker) => {
+            const initPlacePicker = (picker) => {
+                if (picker.dataset.placePickerReady) return;
+                picker.dataset.placePickerReady = '1';
+
                 const form = picker.closest('form');
                 const input = picker.querySelector('[data-place-input]');
                 const hiddenId = picker.querySelector('[data-place-id]');
@@ -118,6 +123,7 @@
                 input.addEventListener('blur', close);
 
                 form?.addEventListener('submit', (event) => {
+                    if (!picker.isConnected || input.disabled) return;
                     if (input.value.trim() !== '' && hiddenId.value === '') {
                         event.preventDefault();
                         error.classList.remove('hidden');
@@ -125,7 +131,10 @@
                         input.focus();
                     }
                 });
-            });
+            };
+
+            window.initPlacePicker = initPlacePicker;
+            document.querySelectorAll('[data-place-picker]').forEach(initPlacePicker);
         })();
     </script>
 @endonce

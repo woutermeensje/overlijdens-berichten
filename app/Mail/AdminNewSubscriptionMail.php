@@ -8,12 +8,16 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Collection;
 
 class AdminNewSubscriptionMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public RegionSubscription $subscription) {}
+    /**
+     * @param  Collection<int, RegionSubscription>  $subscriptions  alle gebieden uit één aanmelding
+     */
+    public function __construct(public Collection $subscriptions) {}
 
     public function envelope(): Envelope
     {
