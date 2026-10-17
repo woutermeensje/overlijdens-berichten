@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\CityLandingController;
+use App\Http\Controllers\CondolenceOverviewController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CrematoriumController;
 use App\Http\Controllers\DashboardController;
@@ -45,6 +46,8 @@ Route::middleware('auth')->group(function (): void {
     Route::middleware('admin')->group(function (): void {
         Route::get('/account', [DashboardController::class, 'index'])->name('account.dashboard');
         Route::get('/account/meldingen', [SubscriptionOverviewController::class, 'index'])->name('account.subscriptions');
+        Route::get('/account/reacties', [CondolenceOverviewController::class, 'index'])->name('account.condolences');
+        Route::delete('/account/reacties/{condolence}', [CondolenceOverviewController::class, 'destroy'])->name('account.condolences.destroy');
         Route::resource('/account/berichten', AccountNoticeController::class)
             ->only(['create', 'store'])
             ->names('account.notices');

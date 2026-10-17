@@ -133,6 +133,7 @@
                     @if(auth()->user()->isAdmin())
                         <li><a class="{{ request()->routeIs('account.dashboard') ? 'active' : '' }}" href="{{ route('account.dashboard') }}"><i class="ph ph-house"></i> Dashboard</a></li>
                         <li><a class="{{ request()->routeIs('account.subscriptions') ? 'active' : '' }}" href="{{ route('account.subscriptions') }}"><i class="ph ph-bell"></i> Meldingen</a></li>
+                        <li><a class="{{ request()->routeIs('account.condolences') ? 'active' : '' }}" href="{{ route('account.condolences') }}"><i class="ph ph-chat-circle-text"></i> Reacties</a></li>
                     @endif
                     <li><a class="{{ request()->routeIs('account.notices.index') ? 'active' : '' }}" href="{{ route('account.notices.index') }}"><i class="ph ph-list-bullets"></i> Mijn berichten</a></li>
                     @if(auth()->user()->isAdmin())

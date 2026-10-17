@@ -60,6 +60,30 @@ class MemorialNoticeCondolenceTest extends TestCase
             ->assertSee('https://register.test/willem');
     }
 
+    public function test_admin_sees_and_can_delete_all_condolences(): void
+    {
+        $notice = $this->createNotice();
+        $notice->condolences()->create(['first_name' => 'Anna', 'last_name' => 'Jansen', 'email' => 'anna@example.com', 'message' => '<p>Veel sterkte gewenst.</p>']);
+        $spam = $notice->condolences()->create(['first_name' => 'Spam', 'last_name' => 'Bot', 'email' => 'bot@example.com', 'message' => '<p>Koop nu goedkoop</p>']);
+
+        $this->actingAs(User::factory()->create())->get(route('account.condolences'))->assertForbidden();
+
+        $admin = User::factory()->create(['is_admin' => true]);
+        $this->actingAs($admin)->get(route('account.condolences'))
+            ->assertOk()
+            ->assertSee('Anna Jansen')
+            ->assertSee('Veel sterkte gewenst.')
+            ->assertSee('Willem Johannes van der Starre');
+
+        $this->actingAs($admin)->get(route('account.condolences', ['zoek' => 'anna']))
+            ->assertSee('Anna Jansen')
+            ->assertDontSee('Koop nu goedkoop');
+
+        $this->actingAs($admin)->delete(route('account.condolences.destroy', $spam))->assertSessionHas('status');
+        $this->assertDatabaseMissing('memorial_notice_condolences', ['id' => $spam->id]);
+        $this->assertSame(1, $notice->condolences()->count());
+    }
+
     private function createNotice(array $attributes = []): MemorialNotice
     {
         $user = User::factory()->create();
