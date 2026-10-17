@@ -46,12 +46,12 @@
             'name' => 'Uitvaartondernemer',
             'intro' => 'Voor uitvaartondernemers die regelmatig berichten plaatsen namens families.',
             'price' => 'In overleg',
-            'priceNote' => 'Prijs afgestemd op uw volume',
+            'priceNote' => 'Prijs afgestemd op je volume',
             'features' => [
                 'Onbeperkt berichten plaatsen en beheren',
-                'Eigen account met overzicht van al uw berichten',
+                'Eigen account met overzicht van al je berichten',
                 'Bedrijfsprofiel met logo en contactgegevens',
-                'Vermelding van uw onderneming bij elk bericht',
+                'Vermelding van je onderneming bij elk bericht',
                 'Voordelig tarief voor uitgelichte berichten',
                 'Eén maandfactuur en een vast aanspreekpunt',
             ],
@@ -66,7 +66,7 @@
     <section class="max-w-[1080px] mx-auto space-y-6">
         <header class="space-y-2 text-center max-w-2xl mx-auto">
             <h1 class="text-2xl sm:text-3xl font-semibold leading-tight">Opties en pakketten</h1>
-            <p class="text-base-content/70">Kies het pakket dat bij u past. Een overlijdensbericht plaatsen is altijd gratis mogelijk.</p>
+            <p class="text-base-content/70">Kies het pakket dat bij je past. Een overlijdensbericht plaatsen is altijd gratis mogelijk.</p>
         </header>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:items-stretch">

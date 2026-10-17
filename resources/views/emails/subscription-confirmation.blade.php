@@ -25,7 +25,7 @@
         </div>
         <div class="body">
             <h2>Aanmelding bevestigd</h2>
-            <p>Bedankt voor uw aanmelding. U ontvangt voortaan wekelijks een overzicht van de nieuwste overlijdensberichten.</p>
+            <p>Bedankt voor je aanmelding. Je ontvangt voortaan wekelijks een overzicht van de nieuwste overlijdensberichten.</p>
 
             <div class="highlight">
                 @foreach($subscriptions as $subscription)
@@ -33,16 +33,16 @@
                 @endforeach
             </div>
 
-            <p>Elke week sturen wij u een e-mail met de meest recente overlijdensberichten uit {{ $subscriptions->count() === 1 ? 'dit gebied' : 'deze gebieden' }}.</p>
+            <p>Elke week sturen we je een e-mail met de meest recente overlijdensberichten uit {{ $subscriptions->count() === 1 ? 'dit gebied' : 'deze gebieden' }}.</p>
 
-            <p>Wilt u zich op een later moment afmelden? Dat kan per gebied:</p>
+            <p>Wil je je later afmelden? Dat kan per gebied:</p>
 
             @foreach($subscriptions as $subscription)
                 <p><a href="{{ route('newsletter.unsubscribe', $subscription->token) }}" class="btn">Afmelden voor {{ $subscription->areaLabel() }}</a></p>
             @endforeach
         </div>
         <div class="footer">
-            <p>U ontvangt deze e-mail omdat u zich heeft aangemeld op <a href="{{ url('/') }}">overlijdens-berichten.nl</a>.</p>
+            <p>Je ontvangt deze e-mail omdat je je hebt aangemeld op <a href="{{ url('/') }}">overlijdens-berichten.nl</a>.</p>
         </div>
     </div>
 </body>

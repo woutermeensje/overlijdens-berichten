@@ -65,7 +65,7 @@ class PublicNoticeWizardController extends Controller
         if ($owner === null) {
             return back()
                 ->withInput($request->except(['password', 'password_confirmation', 'photo']))
-                ->withErrors(['placer_email' => 'Er bestaat al een account met dit e-mailadres. Log eerst in, dan koppelen we het bericht aan uw account.']);
+                ->withErrors(['placer_email' => 'Er bestaat al een account met dit e-mailadres. Log eerst in, dan koppelen we het bericht aan je account.']);
         }
 
         // Uitgelicht is een betaald overlijdensbericht: direct live, factuur volgt achteraf.
@@ -123,7 +123,7 @@ class PublicNoticeWizardController extends Controller
 
             return redirect()
                 ->route('account.notices.index')
-                ->with('status', 'Uw bericht is geplaatst en uw account is aangemaakt. Hier kunt u het bericht later bewerken.');
+                ->with('status', 'Je bericht is geplaatst en je account is aangemaakt. Hier kun je het bericht later bewerken.');
         }
 
         return redirect()->route('home')->with('status', 'Bericht geplaatst.');

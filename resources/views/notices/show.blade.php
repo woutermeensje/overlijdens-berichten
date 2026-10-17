@@ -119,7 +119,7 @@
                         <p class="text-sm text-base-content/70 mb-4">Laat een bericht achter in het externe condoleanceregister.</p>
                         <a href="{{ $notice->condolence_url }}" target="_blank" rel="noopener nofollow" class="btn btn-primary w-full">Naar condoleanceregister</a>
                     @else
-                        <p class="text-sm text-base-content/70">Er is geen extern condoleanceregister gekoppeld. U kunt hieronder een bericht achterlaten.</p>
+                        <p class="text-sm text-base-content/70">Er is geen extern condoleanceregister gekoppeld. Je kunt hieronder een bericht achterlaten.</p>
                     @endif
                 </section>
             </aside>
@@ -164,7 +164,7 @@
 
                 <div class="form-control w-full mt-3">
                     <label for="condolence-input" class="label-text">Bericht</label>
-                    <textarea name="message" id="condolence-input" data-rich-text="basic" data-editor-height="140" required placeholder="Schrijf hier uw condoleance..." class="textarea textarea-bordered w-full" rows="5">{{ old('message') }}</textarea>
+                    <textarea name="message" id="condolence-input" data-rich-text="basic" data-editor-height="140" required placeholder="Schrijf hier je condoleance..." class="textarea textarea-bordered w-full" rows="5">{{ old('message') }}</textarea>
                     @include('partials.rich-text-editor')
                 </div>
 

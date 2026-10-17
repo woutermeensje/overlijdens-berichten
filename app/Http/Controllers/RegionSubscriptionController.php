@@ -90,7 +90,7 @@ class RegionSubscriptionController extends Controller
 
         $labels = $subscriptions->map(fn (RegionSubscription $subscription): string => $subscription->areaLabel());
 
-        return back()->with('newsletter_success', 'U bent aangemeld! U ontvangt wekelijks de laatste overlijdensberichten uit '.$labels->join(', ', ' en ').'.');
+        return back()->with('newsletter_success', 'Je bent aangemeld! Je ontvangt wekelijks de laatste overlijdensberichten uit '.$labels->join(', ', ' en ').'.');
     }
 
     /**
@@ -142,6 +142,6 @@ class RegionSubscriptionController extends Controller
         $subscription = RegionSubscription::where('token', $token)->firstOrFail();
         $subscription->delete();
 
-        return redirect('/')->with('newsletter_success', 'U bent uitgeschreven van de wekelijkse updates.');
+        return redirect('/')->with('newsletter_success', 'Je bent uitgeschreven van de wekelijkse updates.');
     }
 }

@@ -121,7 +121,7 @@ class RegionSubscriptionControllerTest extends TestCase
                 ['type' => 'province', 'name' => 'Utrecht'],
                 ['type' => 'city', 'name' => ''],
             ],
-        ])->assertSessionHas('newsletter_success', 'U bent aangemeld! U ontvangt wekelijks de laatste overlijdensberichten uit Amsterdam en provincie Utrecht.');
+        ])->assertSessionHas('newsletter_success', 'Je bent aangemeld! Je ontvangt wekelijks de laatste overlijdensberichten uit Amsterdam en provincie Utrecht.');
 
         $this->assertDatabaseHas('region_subscriptions', ['email' => 'subscriber@example.com', 'region' => 'Amsterdam', 'province' => 'Noord-Holland']);
         $this->assertDatabaseHas('region_subscriptions', ['email' => 'subscriber@example.com', 'region' => null, 'province' => 'Utrecht']);

@@ -1,6 +1,6 @@
 @php
     $region = $region ?? null;
-    $description = $description ?? 'Meld u aan en ontvang elke week een overzicht van nieuwe berichten in uw mailbox.';
+    $description = $description ?? 'Ontvang elke week de nieuwste overlijdensberichten in je mailbox.';
     // Alleen als hoofdkop gebruiken op pagina's die zelf geen h1 hebben.
     $brandHeading = ($brandAsHeading ?? false) ? 'h1' : 'span';
     $honeypotId = \Illuminate\Support\Str::slug($region ?: 'landelijk');
@@ -12,10 +12,11 @@
     ]));
 @endphp
 
-<div class="max-w-[1080px] mx-auto mb-6 h-6 flex items-center gap-2 text-sm text-base-content/70 min-w-0">
+{{-- Mobiel onder elkaar zodat de tekst niet wordt afgekapt; vanaf sm naast elkaar met een scheidingsstreep. --}}
+<div class="max-w-[1080px] mx-auto mb-6 flex flex-col sm:flex-row sm:items-center gap-x-2 gap-y-0.5 text-sm text-base-content/70">
     <{{ $brandHeading }} class="font-semibold text-base-content shrink-0">Overlijdens-berichten.nl</{{ $brandHeading }}>
-    <span aria-hidden="true" class="shrink-0">|</span>
-    <p class="truncate">Alle overlijdensberichten, familieberichten en rouwadvertenties uit Nederland op één plek.</p>
+    <span aria-hidden="true" class="hidden sm:inline shrink-0">|</span>
+    <p>Alle overlijdensberichten, familieberichten en rouwadvertenties uit Nederland op één plek.</p>
 </div>
 
 <section id="nieuwsbrief" class="max-w-[1080px] mx-auto mb-4">
@@ -50,7 +51,7 @@
                     <label for="hp_website_{{ $honeypotId }}">Website</label>
                     <input type="text" id="hp_website_{{ $honeypotId }}" name="website" value="" tabindex="-1" autocomplete="off">
                 </div>
-                <input type="email" name="email" value="{{ old('email') }}" required placeholder="uw@emailadres.nl" aria-label="E-mailadres" class="input input-bordered w-full lg:w-72 lg:shrink-0 px-3" />
+                <input type="email" name="email" value="{{ old('email') }}" required placeholder="jouw@emailadres.nl" aria-label="E-mailadres" class="input input-bordered w-full lg:w-72 lg:shrink-0 px-3" />
 
                 <div class="flex-1 min-w-0 space-y-2">
                     <div class="space-y-2" data-area-list>

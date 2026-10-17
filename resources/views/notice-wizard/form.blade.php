@@ -37,7 +37,7 @@
                     <legend class="sr-only">Type bericht</legend>
                     <div class="space-y-1">
                         <h2 class="text-lg font-semibold">Type bericht</h2>
-                        <p class="text-sm text-base-content/70">Kies wat voor bericht u wilt plaatsen. De standaardberichten zijn gratis.</p>
+                        <p class="text-sm text-base-content/70">Kies wat voor bericht je wilt plaatsen. De standaardberichten zijn gratis.</p>
                     </div>
                     @php
                         $featuredPrice = \App\Models\MemorialNotice::FEATURED_PRICE_EXCL_VAT;
@@ -45,7 +45,7 @@
                             ->map(fn (string $label): array => ['label' => $label, 'description' => null, 'price' => '€ 0,00', 'note' => 'Gratis', 'noteClass' => 'text-success'])
                             ->put(\App\Models\MemorialNotice::FEATURED_OPTION, [
                                 'label' => 'Uitgelicht overlijdensbericht',
-                                'description' => 'Staat bovenaan de lijst met overlijdensberichten. U ontvangt achteraf een factuur.',
+                                'description' => 'Staat bovenaan de lijst met overlijdensberichten. Je ontvangt achteraf een factuur.',
                                 'price' => '€ '.number_format($featuredPrice, 2, ',', '.'),
                                 'note' => 'excl. btw',
                                 'noteClass' => 'text-base-content/60',
@@ -134,7 +134,7 @@
                 <div id="sectie-overledene" data-progress-section="Gegevens van de overledene" class="rounded-box border border-base-300 bg-base-100 p-4 md:p-5 space-y-4 scroll-mt-6">
                     <div class="space-y-1">
                         <h2 class="text-lg font-semibold">Gegevens van de overledene</h2>
-                        <p class="text-sm text-base-content/70">Vul hier de gegevens in van degene die is overleden, niet uw eigen gegevens.</p>
+                        <p class="text-sm text-base-content/70">Vul hier de gegevens in van degene die is overleden, niet je eigen gegevens.</p>
                     </div>
                     {{-- Naam van de overledene, niet van de invuller: wachtwoordmanagers/autofill uitschakelen. --}}
                     <label class="form-control w-full">
@@ -212,11 +212,11 @@
                     </label>
                 </div>
 
-                <fieldset id="sectie-contact" data-progress-section="Uw contactgegevens" class="rounded-box border border-base-300 bg-base-100 p-4 md:p-5 space-y-4 scroll-mt-6">
-                    <legend class="sr-only">Uw contactgegevens</legend>
+                <fieldset id="sectie-contact" data-progress-section="Jouw contactgegevens" class="rounded-box border border-base-300 bg-base-100 p-4 md:p-5 space-y-4 scroll-mt-6">
+                    <legend class="sr-only">Jouw contactgegevens</legend>
                     <div class="space-y-1">
-                        <h2 class="text-lg font-semibold">Uw contactgegevens</h2>
-                        <p class="text-sm text-base-content/70">Zodat we contact met u kunnen opnemen over dit bericht. Deze gegevens worden niet getoond op de website.</p>
+                        <h2 class="text-lg font-semibold">Jouw contactgegevens</h2>
+                        <p class="text-sm text-base-content/70">Zodat we contact met je kunnen opnemen over dit bericht. Deze gegevens worden niet getoond op de website.</p>
                     </div>
                     @php
                         // Bij een ingelogde gebruiker de accountnaam opsplitsen: eerste woord als voornaam, de rest als achternaam.
@@ -224,15 +224,15 @@
                     @endphp
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <label class="form-control w-full">
-                            <span class="label-text font-medium text-sm">Uw voornaam</span>
+                            <span class="label-text font-medium text-sm">Je voornaam</span>
                             <input class="input input-bordered w-full" name="placer_first_name" data-progress-field value="{{ old('placer_first_name', $accountName[0]) }}" autocomplete="given-name" required>
                         </label>
                         <label class="form-control w-full">
-                            <span class="label-text font-medium text-sm">Uw achternaam</span>
+                            <span class="label-text font-medium text-sm">Je achternaam</span>
                             <input class="input input-bordered w-full" name="placer_last_name" data-progress-field value="{{ old('placer_last_name', $accountName[1] ?? '') }}" autocomplete="family-name" required>
                         </label>
                         <label class="form-control w-full">
-                            <span class="label-text font-medium text-sm">Uw e-mailadres</span>
+                            <span class="label-text font-medium text-sm">Je e-mailadres</span>
                             <input type="email" class="input input-bordered w-full" name="placer_email" data-progress-field value="{{ old('placer_email', auth()->user()?->email) }}" autocomplete="email" required>
                         </label>
                         <label class="form-control w-full">
@@ -244,7 +244,7 @@
                     @auth
                         <p class="text-sm text-base-content/70">
                             <i class="ph ph-user-circle" aria-hidden="true"></i>
-                            Het bericht wordt gekoppeld aan uw account, zodat u het later kunt bewerken.
+                            Het bericht wordt gekoppeld aan je account, zodat je het later kunt bewerken.
                         </p>
                     @else
                         <div class="rounded-box border border-base-300 bg-base-200/40 p-4 space-y-4">
@@ -253,7 +253,7 @@
                                 <input type="checkbox" id="create-account" name="create_account" value="1" class="checkbox checkbox-primary checkbox-sm mt-0.5" @checked(old('create_account'))>
                                 <span>
                                     <span class="block font-medium">Ik wil een account aanmaken</span>
-                                    <span class="block text-sm text-base-content/70">Dan kunt u het bericht na plaatsing zelf nog bewerken.</span>
+                                    <span class="block text-sm text-base-content/70">Dan kun je het bericht na plaatsing zelf nog bewerken.</span>
                                 </span>
                             </label>
 
@@ -269,7 +269,7 @@
                                 </label>
                             </div>
 
-                            <p class="text-sm text-base-content/70">Heeft u al een account? <a href="{{ route('login') }}" class="link">Log eerst in</a>.</p>
+                            <p class="text-sm text-base-content/70">Heb je al een account? <a href="{{ route('login') }}" class="link">Log eerst in</a>.</p>
                         </div>
                     @endauth
                 </fieldset>

@@ -81,7 +81,7 @@
                 <article class="card bg-base-100 border border-base-300">
                     <div class="card-body">
                         @if($filters->isActive())
-                            Geen berichten gevonden die aan uw zoekopdracht voldoen.
+                            Geen berichten gevonden die aan je zoekopdracht voldoen.
                         @else
                             Er zijn nog geen berichten gepubliceerd.
                         @endif

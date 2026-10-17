@@ -1,7 +1,7 @@
 @extends('layouts.public')
 
 @section('title', 'Inloggen')
-@section('meta_description', 'Log in om uw berichten te beheren.')
+@section('meta_description', 'Log in om je berichten te beheren.')
 @section('meta_robots', 'noindex,nofollow')
 
 @section('content')

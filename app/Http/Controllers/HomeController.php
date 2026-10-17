@@ -70,6 +70,6 @@ class HomeController extends Controller
         $notice->condolences()->create($validated);
 
         return redirect(route('notice.show', $notice->slug).'#condoleances')
-            ->with('condolence_success', 'Bedankt, uw bericht is geplaatst.');
+            ->with('condolence_success', 'Bedankt, je bericht is geplaatst.');
     }
 }
