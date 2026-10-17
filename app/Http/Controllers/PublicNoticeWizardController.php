@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\AdminFeaturedNoticeMail;
+use App\Mail\AdminNewNoticeMail;
 use App\Models\MemorialNotice;
 use App\Models\User;
 use App\Services\Geocoder;
@@ -111,10 +112,9 @@ class PublicNoticeWizardController extends Controller
             'published_at' => now(),
         ]);
 
-        if ($isFeatured) {
-            foreach (User::adminEmails() as $adminEmail) {
-                Mail::to($adminEmail)->send(new AdminFeaturedNoticeMail($notice));
-            }
+        // Uitgelichte berichten hebben een eigen mail met factuurgegevens; zo krijgt de admin er maar één.
+        foreach (User::adminEmails() as $adminEmail) {
+            Mail::to($adminEmail)->send($isFeatured ? new AdminFeaturedNoticeMail($notice) : new AdminNewNoticeMail($notice));
         }
 
         if ($createsAccount) {

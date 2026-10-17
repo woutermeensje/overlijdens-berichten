@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Mail\AdminFeaturedNoticeMail;
+use App\Mail\AdminNewNoticeMail;
 use App\Models\MemorialNotice;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -244,6 +245,20 @@ class PublicNoticeFormTest extends TestCase
 
         Mail::assertSent(AdminFeaturedNoticeMail::class, fn ($mail) => $mail->hasTo('admin@example.com'));
         Mail::assertSent(AdminFeaturedNoticeMail::class, fn ($mail) => str_contains($mail->render(), 'Contactgegevens plaatser'));
+        Mail::assertNotSent(AdminNewNoticeMail::class);
+    }
+
+    public function test_admins_are_notified_of_every_new_notice(): void
+    {
+        Mail::fake();
+        User::factory()->create(['email' => 'admin@example.com', 'is_admin' => true]);
+
+        $this->post(route('notice.wizard.submit'), $this->validPayload())->assertRedirect(route('home'));
+
+        Mail::assertSent(AdminNewNoticeMail::class, fn ($mail) => $mail->hasTo('admin@example.com')
+            && str_contains($mail->render(), 'Maria de Vries')
+            && str_contains($mail->render(), 'jan@example.com'));
+        Mail::assertNotSent(AdminFeaturedNoticeMail::class);
     }
 
     public function test_billing_fields_are_ignored_for_free_notices(): void
@@ -255,7 +270,7 @@ class PublicNoticeFormTest extends TestCase
         ]))->assertRedirect(route('home'));
 
         $this->assertNull(MemorialNotice::query()->sole()->billing_details);
-        Mail::assertNothingSent();
+        Mail::assertNotSent(AdminFeaturedNoticeMail::class);
     }
 
     public function test_full_name_with_multiple_first_names_is_kept_intact(): void
